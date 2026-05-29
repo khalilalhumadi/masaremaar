@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Only the authenticated admin email can read/write CMS collections.
+    // Public visitors never touch Firestore — all public reads go through
+    // the Next.js server (Admin SDK) in Phase 2+.
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email == "admin@masaremaar.com"
+          && request.auth.token.email_verified == true;
+    }
+
+    match /cms_sections/{sectionId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /cms_projects/{projectId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Deny everything else — including all public client access.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

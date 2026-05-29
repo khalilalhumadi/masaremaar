@@ -5,6 +5,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -22,6 +23,10 @@ function getClientApp(): FirebaseApp {
 
 export function getClientAuth(): Auth {
   return getAuth(getClientApp());
+}
+
+export function getClientDb(): Firestore {
+  return getFirestore(getClientApp());
 }
 
 export function getClientStorage(): FirebaseStorage {
