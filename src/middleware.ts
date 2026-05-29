@@ -1,26 +1,22 @@
-// middleware.ts — protects /admin/* routes
-// Checks for the admin-session cookie set by the login page.
-// Real security is enforced by Firestore rules (Firebase Auth required).
-// Server-side token verification upgrades to Admin SDK when service account is added.
-
+// middleware.ts — fast edge check for /admin/* routes.
+// Only verifies cookie EXISTENCE (Admin SDK cannot run on the edge).
+// Full session verification (admin claim + revocation check) happens in
+// src/app/admin/(protected)/layout.tsx via Firebase Admin SDK.
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const session = request.cookies.get("__session");
 
-  // Only guard /admin routes
-  if (!pathname.startsWith("/admin")) return NextResponse.next();
+  // Already authenticated → redirect away from login page
+  if (session && pathname === "/admin/login") {
+    return NextResponse.redirect(new URL("/admin", request.url));
+  }
 
-  // Login page is always accessible
-  if (pathname === "/admin/login") return NextResponse.next();
-
-  // Check session cookie (set by login page after successful Firebase Auth)
-  const session = request.cookies.get("admin-session")?.value;
-  if (!session) {
-    const loginUrl = new URL("/admin/login", request.url);
-    loginUrl.searchParams.set("from", pathname);
-    return NextResponse.redirect(loginUrl);
+  // Not authenticated → redirect to login
+  if (!session && pathname !== "/admin/login") {
+    return NextResponse.redirect(new URL("/admin/login", request.url));
   }
 
   return NextResponse.next();

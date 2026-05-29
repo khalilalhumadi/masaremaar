@@ -1,24 +1,37 @@
 rules_version = '2';
+// Masaremaar CMS — Firestore Security Rules
+// See docs/CMS-PLAN.md for full architecture.
+//
+// DEPLOY: firebase deploy --only firestore:rules
+// Or paste directly into Firebase Console → Firestore → Rules tab.
+//
+// Admin access is granted via a custom claim (admin: true) set by:
+//   node --env-file=.env.local scripts/set-admin-claim.mjs <uid>
+// This is more flexible than hardcoding an email address.
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Only the authenticated admin email can read/write CMS collections.
-    // Public visitors never touch Firestore — all public reads go through
-    // the Next.js server (Admin SDK) in Phase 2+.
+    // Helper — true when the caller is authenticated and has the admin claim.
     function isAdmin() {
       return request.auth != null
-          && request.auth.token.email == "admin@masaremaar.com";
+          && request.auth.token.admin == true;
     }
 
-    match /cms_sections/{sectionId} {
+    // ── CMS sections ─────────────────────────────────────────────────────────
+    // Admin dashboard reads/writes client-side via Firebase Auth.
+    // Server Actions (Admin SDK) also write here — they bypass these rules.
+    match /cms_sections/{sectionKey} {
       allow read, write: if isAdmin();
     }
 
+    // ── CMS projects (Phase 2) ────────────────────────────────────────────────
     match /cms_projects/{projectId} {
       allow read, write: if isAdmin();
     }
 
-    // Deny everything else — including all public client access.
+    // ── Default — deny everything else ───────────────────────────────────────
+    // Public pages never read Firestore from the browser.
     match /{document=**} {
       allow read, write: if false;
     }

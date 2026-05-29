@@ -121,7 +121,8 @@ export default function DashboardPage() {
   async function handleLogout() {
     const auth = getClientAuth();
     await signOut(auth);
-    document.cookie = "admin-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    // Clear the httpOnly __session cookie server-side (JS cannot clear httpOnly cookies).
+    await fetch("/api/auth/session", { method: "DELETE" });
     router.push("/admin/login");
   }
 

@@ -23,12 +23,33 @@ function LoginForm() {
 
     try {
       const auth = getClientAuth();
-      await signInWithEmailAndPassword(auth, email, password);
-      // Set session cookie so middleware allows access to /admin/*
-      document.cookie = `admin-session=${encodeURIComponent(email)}; path=/; SameSite=Strict`;
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await cred.user.getIdToken();
+
+      // Exchange for an httpOnly __session cookie (also verifies admin claim).
+      const res = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error ?? "Login failed.");
+        setLoading(false);
+        return;
+      }
+
       router.push(from);
-    } catch {
-      setError("Invalid email or password.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.includes("invalid-credential") || msg.includes("wrong-password") || msg.includes("user-not-found")) {
+        setError("Incorrect email or password.");
+      } else if (msg.includes("too-many-requests")) {
+        setError("Too many attempts. Try again later.");
+      } else {
+        setError("Login failed. Please try again.");
+      }
       setLoading(false);
     }
   }
