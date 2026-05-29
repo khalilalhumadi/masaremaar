@@ -7,8 +7,7 @@ service cloud.firestore {
     // the Next.js server (Admin SDK) in Phase 2+.
     function isAdmin() {
       return request.auth != null
-          && request.auth.token.email == "admin@masaremaar.com"
-          && request.auth.token.email_verified == true;
+          && request.auth.token.email == "admin@masaremaar.com";
     }
 
     match /cms_sections/{sectionId} {
