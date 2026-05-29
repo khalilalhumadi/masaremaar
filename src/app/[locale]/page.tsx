@@ -1,13 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { Eyebrow, SectionHead, TitleParts } from "@/components/primitives";
-import {
-  ServicesSection,
-  FeaturedProjectsSection,
-  WhySection,
-  HowStepsSection,
-  CTABand,
-} from "@/components/sections";
+import { WhySection, CTABand } from "@/components/sections";
 import { CONTENT, IMAGES, navHref, type Locale } from "@/lib/content";
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -94,10 +88,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      <ServicesSection locale={locale} />
-      <FeaturedProjectsSection locale={locale} />
       <WhySection locale={locale} />
-      <HowStepsSection locale={locale} preview />
       <CTABand locale={locale} />
     </div>
   );
