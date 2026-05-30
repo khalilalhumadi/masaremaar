@@ -144,6 +144,9 @@ export default function DashboardPage() {
           <Link href="/admin/projects">Projects</Link>
           <Link href="/admin/sections/about">About</Link>
           <Link href="/admin/sections/contact">Contact</Link>
+          <Link href="/admin/sections/services">Services</Link>
+          <Link href="/admin/sections/how_we_work">How We Work</Link>
+          <Link href="/admin/sections/company_profile">Company Profile</Link>
           <div className="admin-nav-section" style={{ marginTop: 16 }}>Site</div>
           <a href="/en" target="_blank" rel="noopener">View live site ↗</a>
           <div className="admin-nav-section" style={{ marginTop: 16 }}>Account</div>

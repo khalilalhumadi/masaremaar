@@ -10,11 +10,15 @@ import { CONTENT, IMAGES, navHref, type Locale, type Project } from "@/lib/conte
 export function ServicesSection({
   locale,
   showAll = false,
+  items,
 }: {
   locale: Locale;
   showAll?: boolean;
+  // Optional CMS override; when omitted, content.ts defaults are used (home page).
+  items?: { id: string; icon: string; title: string; desc: string }[];
 }) {
   const svc = CONTENT.services[locale];
+  const serviceItems = items ?? svc.items;
 
   return (
     <section className="section" id="services">
@@ -26,7 +30,7 @@ export function ServicesSection({
           href={!showAll ? navHref(locale, "services") : undefined}
         />
         <div className="services-grid card">
-          {svc.items.map((s, i) => {
+          {serviceItems.map((s, i) => {
             const Glyph = Icon[s.icon as IconName] ?? Icon.building;
             return (
               <Link key={s.id} className="service-card" href={navHref(locale, "services")}>
@@ -156,8 +160,21 @@ export function WhySection({ locale }: { locale: Locale }) {
 // ─────────────────────────────────────────────────────────────
 // How we work (preview on home, full on /how)
 // ─────────────────────────────────────────────────────────────
-export function HowStepsSection({ locale, preview = false }: { locale: Locale; preview?: boolean }) {
+export function HowStepsSection({
+  locale,
+  preview = false,
+  sub,
+  steps,
+}: {
+  locale: Locale;
+  preview?: boolean;
+  // Optional CMS overrides; when omitted, content.ts defaults are used (home page).
+  sub?: string;
+  steps?: { title: string; desc: string }[];
+}) {
   const h = CONTENT.how[locale];
+  const stepItems = steps ?? h.steps;
+  const subText = sub ?? h.sub;
   return (
     <section className="section" style={{ background: "#fff" }}>
       <div className="container">
@@ -169,11 +186,11 @@ export function HowStepsSection({ locale, preview = false }: { locale: Locale; p
         />
         {!preview && (
           <p style={{ maxWidth: "64ch", marginTop: -36, marginBottom: 56, color: "var(--ink-3)", fontSize: 18, lineHeight: 1.6 }}>
-            {h.sub}
+            {subText}
           </p>
         )}
         <div className="steps-grid">
-          {h.steps.map((s, i) => (
+          {stepItems.map((s, i) => (
             <div className="step" key={i}>
               <div className="step-num">
                 {String(i + 1).padStart(2, "0")}

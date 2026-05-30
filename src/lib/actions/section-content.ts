@@ -12,6 +12,9 @@ type ActionResult = { ok: boolean; error?: string };
 const SECTION_PUBLIC_PATH: Record<string, string> = {
   about: "about",
   contact: "contact",
+  services: "services",
+  how_we_work: "how",
+  company_profile: "profile",
 };
 
 async function guard(key: string): Promise<{ uid: string } | { error: string }> {

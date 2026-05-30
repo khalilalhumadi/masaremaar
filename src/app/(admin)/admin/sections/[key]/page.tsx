@@ -15,6 +15,8 @@ import {
   type SectionField,
   type SectionOverride,
   type DepartmentRow,
+  type ServiceItemRow,
+  type HowStepRow,
 } from "@/lib/cms/section-schema";
 import { SECTION_TITLES } from "@/lib/cms-types";
 
@@ -119,6 +121,66 @@ function DepartmentsEditor({
   );
 }
 
+// Fixed-list editor for the 6 service items (ids/icons are structural — no add/remove).
+function ServiceItemsEditor({
+  rows,
+  onChange,
+}: {
+  rows: ServiceItemRow[];
+  onChange: (rows: ServiceItemRow[]) => void;
+}) {
+  function update(i: number, patch: Partial<ServiceItemRow>) {
+    onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  }
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {rows.map((r, i) => (
+        <div key={r.id ?? i} style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 16, background: "#fafafa" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10 }}>
+            #{i + 1} · <span style={{ color: "#9ca3af" }}>{r.id}</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <input type="text" placeholder="Title (English)" value={r.title_en} onChange={(e) => update(i, { title_en: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder="العنوان (Arabic)" dir="rtl" value={r.title_ar} onChange={(e) => update(i, { title_ar: e.target.value })} style={inputStyle} />
+            <textarea placeholder="Description (English)" rows={2} value={r.desc_en} onChange={(e) => update(i, { desc_en: e.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
+            <textarea placeholder="الوصف (Arabic)" dir="rtl" rows={2} value={r.desc_ar} onChange={(e) => update(i, { desc_ar: e.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Fixed-list editor for the 4 process steps.
+function HowStepsEditor({
+  rows,
+  onChange,
+}: {
+  rows: HowStepRow[];
+  onChange: (rows: HowStepRow[]) => void;
+}) {
+  function update(i: number, patch: Partial<HowStepRow>) {
+    onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  }
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {rows.map((r, i) => (
+        <div key={i} style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 16, background: "#fafafa" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10 }}>
+            Step {String(i + 1).padStart(2, "0")}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <input type="text" placeholder="Title (English)" value={r.title_en} onChange={(e) => update(i, { title_en: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder="العنوان (Arabic)" dir="rtl" value={r.title_ar} onChange={(e) => update(i, { title_ar: e.target.value })} style={inputStyle} />
+            <textarea placeholder="Description (English)" rows={2} value={r.desc_en} onChange={(e) => update(i, { desc_en: e.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
+            <textarea placeholder="الوصف (Arabic)" dir="rtl" rows={2} value={r.desc_ar} onChange={(e) => update(i, { desc_ar: e.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function SectionEditPage() {
   const router = useRouter();
   const params = useParams();
@@ -215,6 +277,9 @@ export default function SectionEditPage() {
           <Link href="/admin/projects">Projects</Link>
           <Link href="/admin/sections/about" className={key === "about" ? "active" : undefined}>About</Link>
           <Link href="/admin/sections/contact" className={key === "contact" ? "active" : undefined}>Contact</Link>
+          <Link href="/admin/sections/services" className={key === "services" ? "active" : undefined}>Services</Link>
+          <Link href="/admin/sections/how_we_work" className={key === "how_we_work" ? "active" : undefined}>How We Work</Link>
+          <Link href="/admin/sections/company_profile" className={key === "company_profile" ? "active" : undefined}>Company Profile</Link>
           <div className="admin-nav-section" style={{ marginTop: 16 }}>Site</div>
           <a href="/en" target="_blank" rel="noopener">View live site ↗</a>
           <div className="admin-nav-section" style={{ marginTop: 16 }}>Account</div>
@@ -270,22 +335,43 @@ export default function SectionEditPage() {
                 {SECTION_FIELD_GROUPS[key as EditableSectionKey].map((group) => (
                   <div key={group.title} style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 8, padding: 24, marginBottom: 20 }}>
                     <h2 style={{ margin: "0 0 18px", fontSize: 15, fontWeight: 600 }}>{group.title}</h2>
-                    {group.fields.map((field) =>
-                      field.type === "departments" ? (
-                        <DepartmentsEditor
-                          key={field.key}
-                          rows={Array.isArray(data.departments) ? (data.departments as DepartmentRow[]) : []}
-                          onChange={(rows) => setField("departments", rows)}
-                        />
-                      ) : (
+                    {group.fields.map((field) => {
+                      if (field.type === "departments") {
+                        return (
+                          <DepartmentsEditor
+                            key={field.key}
+                            rows={Array.isArray(data.departments) ? (data.departments as DepartmentRow[]) : []}
+                            onChange={(rows) => setField("departments", rows)}
+                          />
+                        );
+                      }
+                      if (field.type === "service_items") {
+                        return (
+                          <ServiceItemsEditor
+                            key={field.key}
+                            rows={Array.isArray(data.items) ? (data.items as ServiceItemRow[]) : []}
+                            onChange={(rows) => setField("items", rows)}
+                          />
+                        );
+                      }
+                      if (field.type === "how_steps") {
+                        return (
+                          <HowStepsEditor
+                            key={field.key}
+                            rows={Array.isArray(data.steps) ? (data.steps as HowStepRow[]) : []}
+                            onChange={(rows) => setField("steps", rows)}
+                          />
+                        );
+                      }
+                      return (
                         <FieldInput
                           key={field.key}
                           field={field}
                           value={typeof data[field.key] === "string" ? (data[field.key] as string) : ""}
                           onChange={(v) => setField(field.key, v)}
                         />
-                      )
-                    )}
+                      );
+                    })}
                   </div>
                 ))}
 

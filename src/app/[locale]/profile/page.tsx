@@ -5,10 +5,10 @@ import { CTABand } from "@/components/sections";
 import { CONTENT, IMAGES, navHref, type Locale, type TitlePart } from "@/lib/content";
 import { isSectionFrozen } from "@/lib/cms/freeze";
 import UnderConstruction from "@/components/UnderConstruction";
+import { getPublishedSectionData } from "@/lib/data/section-content";
+import { resolveProfilePdf } from "@/lib/cms/section-schema";
 
 export const revalidate = 60;
-
-const PROFILE_PDF = "/uploads/Company%20Profile%205a-compressed.pdf";
 
 const PREVIEWS: { en: string; ar: string }[] = [
   { en: "Cover", ar: "الغلاف" },
@@ -29,6 +29,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
   const nav = CONTENT.nav[locale];
   const ui = CONTENT.ui[locale];
   const en = locale === "en";
+  const profilePdf = resolveProfilePdf(await getPublishedSectionData("company_profile"));
 
   const title: TitlePart[] = [
     en ? "Read our full" : "اقرأ",
@@ -52,7 +53,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
       <section className="section">
         <div className="container">
           <div style={{ display: "flex", gap: 16, marginBottom: 56, flexWrap: "wrap" }}>
-            <a className="btn btn-primary" href={PROFILE_PDF} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-primary" href={profilePdf} target="_blank" rel="noopener noreferrer">
               <Icon.download width={16} height={16} /> {ui.downloadProfile}
             </a>
             <Link className="btn btn-outline" href={navHref(locale, "contact")}>

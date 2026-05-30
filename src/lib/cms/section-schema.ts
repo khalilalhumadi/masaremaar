@@ -7,9 +7,20 @@
 
 import { CONTENT, type Locale } from "@/lib/content";
 
-export type EditableSectionKey = "about" | "contact";
+export type EditableSectionKey =
+  | "about"
+  | "contact"
+  | "services"
+  | "how_we_work"
+  | "company_profile";
 
-export const EDITABLE_SECTIONS: EditableSectionKey[] = ["about", "contact"];
+export const EDITABLE_SECTIONS: EditableSectionKey[] = [
+  "about",
+  "contact",
+  "services",
+  "how_we_work",
+  "company_profile",
+];
 
 export function isEditableSection(key: string): key is EditableSectionKey {
   return (EDITABLE_SECTIONS as string[]).includes(key);
@@ -17,9 +28,12 @@ export function isEditableSection(key: string): key is EditableSectionKey {
 
 export type SectionOverride = Record<string, unknown>;
 
+// Default Company Profile PDF (also the fallback used by the public page).
+export const DEFAULT_PROFILE_PDF = "/uploads/Company%20Profile%205a-compressed.pdf";
+
 // ── Form field schema ─────────────────────────────────────────────────────────
 
-export type FieldType = "text" | "textarea" | "departments";
+export type FieldType = "text" | "textarea" | "departments" | "service_items" | "how_steps";
 
 export interface SectionField {
   key: string;
@@ -84,11 +98,53 @@ export const SECTION_FIELD_GROUPS: Record<EditableSectionKey, SectionFieldGroup[
       ],
     },
   ],
+  services: [
+    {
+      title: "Service items",
+      fields: [{ key: "items", label: "Services", type: "service_items" }],
+    },
+  ],
+  how_we_work: [
+    {
+      title: "Page intro",
+      fields: [
+        { key: "sub_en", label: "Intro (English)", type: "textarea" },
+        { key: "sub_ar", label: "Intro (Arabic)", type: "textarea", dir: "rtl" },
+      ],
+    },
+    {
+      title: "Steps",
+      fields: [{ key: "steps", label: "Steps", type: "how_steps" }],
+    },
+  ],
+  company_profile: [
+    {
+      title: "Download",
+      fields: [
+        { key: "pdfUrl", label: "Company Profile PDF URL", type: "text" },
+      ],
+    },
+  ],
 };
 
 export interface DepartmentRow {
   name_en: string;
   name_ar: string;
+  desc_en: string;
+  desc_ar: string;
+}
+
+export interface ServiceItemRow {
+  id: string;
+  title_en: string;
+  title_ar: string;
+  desc_en: string;
+  desc_ar: string;
+}
+
+export interface HowStepRow {
+  title_en: string;
+  title_ar: string;
   desc_en: string;
   desc_ar: string;
 }
@@ -106,6 +162,36 @@ export function defaultOverride(key: EditableSectionKey): SectionOverride {
       hours_ar: CONTENT.contact.ar.hours,
     };
   }
+
+  if (key === "services") {
+    const items: ServiceItemRow[] = CONTENT.services.en.items.map((it, i) => ({
+      id: it.id,
+      title_en: it.title,
+      title_ar: CONTENT.services.ar.items[i]?.title ?? "",
+      desc_en: it.desc,
+      desc_ar: CONTENT.services.ar.items[i]?.desc ?? "",
+    }));
+    return { items };
+  }
+
+  if (key === "how_we_work") {
+    const steps: HowStepRow[] = CONTENT.how.en.steps.map((st, i) => ({
+      title_en: st.title,
+      title_ar: CONTENT.how.ar.steps[i]?.title ?? "",
+      desc_en: st.desc,
+      desc_ar: CONTENT.how.ar.steps[i]?.desc ?? "",
+    }));
+    return {
+      sub_en: CONTENT.how.en.sub,
+      sub_ar: CONTENT.how.ar.sub,
+      steps,
+    };
+  }
+
+  if (key === "company_profile") {
+    return { pdfUrl: DEFAULT_PROFILE_PDF };
+  }
+
   // about
   const en = CONTENT.about.en;
   const ar = CONTENT.about.ar;
@@ -176,4 +262,59 @@ export function resolveAbout(locale: Locale, o: SectionOverride | null) {
     teamSub: pick("teamSub_en", "teamSub_ar") || base.teamSub,
     departments,
   };
+}
+
+export interface ResolvedServiceItem {
+  id: string;
+  icon: string;
+  title: string;
+  desc: string;
+}
+
+export function resolveServices(locale: Locale, o: SectionOverride | null) {
+  const base = CONTENT.services[locale];
+  const overrides = Array.isArray(o?.items) ? (o!.items as ServiceItemRow[]) : [];
+  const byId = new Map(overrides.map((it) => [it.id, it]));
+  // Always return a fresh (mutable) item array so it satisfies component props.
+  const items: ResolvedServiceItem[] = base.items.map((it) => {
+    const ov = byId.get(it.id);
+    return {
+      id: it.id,
+      icon: it.icon,
+      title: ov ? (locale === "en" ? str(ov.title_en) : str(ov.title_ar)) || it.title : it.title,
+      desc: ov ? (locale === "en" ? str(ov.desc_en) : str(ov.desc_ar)) || it.desc : it.desc,
+    };
+  });
+  return { ...base, items };
+}
+
+export interface ResolvedHowStep {
+  title: string;
+  desc: string;
+}
+
+export function resolveHow(locale: Locale, o: SectionOverride | null) {
+  const base = CONTENT.how[locale];
+  const rawSteps = Array.isArray(o?.steps) ? (o!.steps as HowStepRow[]) : [];
+  // Always return a fresh (mutable) steps array so it satisfies component props.
+  const steps: ResolvedHowStep[] = base.steps.map((st, i) => {
+    const ov = rawSteps[i];
+    return ov
+      ? {
+          title: (locale === "en" ? str(ov.title_en) : str(ov.title_ar)) || st.title,
+          desc: (locale === "en" ? str(ov.desc_en) : str(ov.desc_ar)) || st.desc,
+        }
+      : { title: st.title, desc: st.desc };
+  });
+  return {
+    ...base,
+    sub: (locale === "en" ? str(o?.sub_en) : str(o?.sub_ar)) || base.sub,
+    steps,
+  };
+}
+
+/** Company Profile: returns the published PDF URL, or the bundled default. */
+export function resolveProfilePdf(o: SectionOverride | null): string {
+  if (!o) return DEFAULT_PROFILE_PDF;
+  return str(o.pdfUrl) || DEFAULT_PROFILE_PDF;
 }
