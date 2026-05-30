@@ -224,18 +224,24 @@ export default function ProjectEditPage() {
     setUploadError(null);
     setUploading(true);
 
-    const formData = new FormData();
-    formData.append("file", file);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const result = await uploadProjectImage(projectId, formData);
+      const result = await uploadProjectImage(projectId, formData);
 
-    if (!result.ok) {
-      setUploadError(result.error ?? "Upload failed.");
-    } else {
-      setCoverImageUrl(result.url!);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (!result.ok) {
+        setUploadError(result.error ?? "Upload failed.");
+      } else {
+        setCoverImageUrl(result.url!);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      setUploadError("Upload failed — check the browser console for details.");
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
   }
 
   if (loading) {

@@ -33,9 +33,18 @@ export async function uploadProjectImage(
     process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!
   );
 
-  await bucket.file(path).save(buffer, {
-    metadata: { contentType: blob.type },
-  });
+  try {
+    await bucket.file(path).save(buffer, {
+      // contentType must be a top-level option, not nested under metadata.
+      // resumable: false forces a single-request upload — resumable sessions
+      // can hang on first attempt if there is any transient connectivity issue.
+      contentType: blob.type,
+      resumable: false,
+    });
+  } catch (err) {
+    console.error("uploadProjectImage — GCS save error:", err);
+    return { ok: false, error: "Storage upload failed. Check server logs." };
+  }
 
   // No download token needed — Storage rules have `allow read: if true`.
   const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(path)}?alt=media`;
