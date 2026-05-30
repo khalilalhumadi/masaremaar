@@ -367,6 +367,10 @@ html[dir="rtl"] .hero-meta { align-items: flex-start; text-align: left; }
   letter-spacing: -.02em;
   text-transform: none;
 }
+/* Calm the floating "09+" on small screens; hide on phones to avoid
+   crowding the hero CTA buttons. */
+@media (max-width: 700px) { .hero-meta-num { font-size: 40px; } }
+@media (max-width: 480px) { .hero-meta { display: none; } }
 
 /* hero variants */
 .hero--split { display: grid; grid-template-columns: 1.1fr 1fr; align-items: stretch; gap: 0; min-height: 88vh; }
@@ -914,6 +918,17 @@ html[dir="rtl"] .field input, html[dir="rtl"] .field textarea { font-family: var
 .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--green-800); }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
+
+/* ─── Project modal meta (Location / Category / Year) ─────── */
+.modal-meta { display: grid; grid-template-columns: repeat(3, 1fr); }
+.modal-meta-cell { padding: 20px 0; }
+.modal-meta-cell + .modal-meta-cell { border-inline-start: 1px solid var(--line); padding-inline-start: 24px; }
+@media (max-width: 480px) {
+  .modal-meta { grid-template-columns: 1fr; }
+  /* Stack vertically: swap the vertical divider for a horizontal one. */
+  .modal-meta-cell { padding: 16px 0; }
+  .modal-meta-cell + .modal-meta-cell { border-inline-start: 0; padding-inline-start: 0; border-top: 1px solid var(--line); }
+}
 
 /* ─── Misc ────────────────────────────────────────────────── */
 .tag-pill {

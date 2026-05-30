@@ -77,9 +77,9 @@ export default function ProjectModal({
             <Icon.pin width={16} height={16} /> {project.location[locale]}
           </div>
           <p style={{ fontSize: 17, lineHeight: 1.7, color: "var(--ink-2)", maxWidth: "68ch" }}>{project.desc[locale]}</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0, marginTop: 36, borderTop: "1px solid var(--line)" }}>
+          <div className="modal-meta" style={{ marginTop: 36, borderTop: "1px solid var(--line)" }}>
             {meta.map((m, i) => (
-              <div key={i} style={{ padding: "20px 0", borderInlineStart: i > 0 ? "1px solid var(--line)" : "0", paddingInlineStart: i > 0 ? 24 : 0 }}>
+              <div key={i} className="modal-meta-cell">
                 <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--ink-4)", marginBottom: 6 }}>{m.label}</div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: 22 }}>{m.val}</div>
               </div>
