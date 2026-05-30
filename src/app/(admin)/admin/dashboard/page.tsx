@@ -11,6 +11,7 @@ import {
   type CmsSection,
   type SectionKey,
 } from "@/lib/cms/sections";
+import { isEditableSection } from "@/lib/cms/section-schema";
 
 // Section descriptions shown in the dashboard
 const SECTION_DESCRIPTIONS: Record<string, string> = {
@@ -244,11 +245,24 @@ export default function DashboardPage() {
                         )}
                       </td>
                       <td>
-                        <FreezeToggle
-                          section={s}
-                          onToggle={handleToggle}
-                          disabled={anyBusy}
-                        />
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          <FreezeToggle
+                            section={s}
+                            onToggle={handleToggle}
+                            disabled={anyBusy}
+                          />
+                          {s.sectionKey === "projects" ? (
+                            <Link href="/admin/projects" style={{ fontSize: 13, color: "var(--green-700)", fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap" }}>
+                              Edit →
+                            </Link>
+                          ) : isEditableSection(s.sectionKey) ? (
+                            <Link href={`/admin/sections/${s.sectionKey}`} style={{ fontSize: 13, color: "var(--green-700)", fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap" }}>
+                              Edit →
+                            </Link>
+                          ) : (
+                            <span style={{ fontSize: 12, color: "#c0c3bd", whiteSpace: "nowrap" }}>Freeze only</span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

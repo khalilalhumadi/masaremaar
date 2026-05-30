@@ -3,6 +3,8 @@ import { CTABand } from "@/components/sections";
 import { CONTENT, IMAGES, type Locale } from "@/lib/content";
 import { isSectionFrozen } from "@/lib/cms/freeze";
 import UnderConstruction from "@/components/UnderConstruction";
+import { getPublishedSectionData } from "@/lib/data/section-content";
+import { resolveAbout } from "@/lib/cms/section-schema";
 
 export const revalidate = 60;
 
@@ -10,7 +12,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   const { locale: raw } = await params;
   const locale = raw as Locale;
   if (await isSectionFrozen("about")) return <UnderConstruction locale={locale} />;
-  const a = CONTENT.about[locale];
+  const a = resolveAbout(locale, await getPublishedSectionData("about"));
   const nav = CONTENT.nav[locale];
   const en = locale === "en";
 
