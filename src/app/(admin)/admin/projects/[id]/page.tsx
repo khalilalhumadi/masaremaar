@@ -208,7 +208,7 @@ export default function ProjectEditPage() {
     setSaving(false);
   }
 
-  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -225,6 +225,15 @@ export default function ProjectEditPage() {
     setUploadError(null);
     setUploadProgress(0);
 
+    // Force token refresh so the admin custom claim is always current.
+    // Without this, a token issued before the claim was set would be rejected.
+    try {
+      const currentUser = getClientAuth().currentUser;
+      if (currentUser) await currentUser.getIdToken(true);
+    } catch {
+      // Non-fatal — proceed with existing token
+    }
+
     const storage = getClientStorage();
     const ext = file.name.split(".").pop() ?? "jpg";
     const path = `projects/${projectId}/${Date.now()}.${ext}`;
@@ -233,11 +242,31 @@ export default function ProjectEditPage() {
 
     task.on(
       "state_changed",
-      (snap) => setUploadProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
+      (snap) => {
+        const pct = snap.totalBytes > 0
+          ? Math.round((snap.bytesTransferred / snap.totalBytes) * 100)
+          : 0;
+        setUploadProgress(pct);
+      },
       (err) => {
-        console.error(err);
-        setUploadError("Upload failed — " + err.message);
+        console.error("Storage upload error:", err.code, err.message);
+        let msg: string;
+        switch (err.code) {
+          case "storage/unauthorized":
+            msg = "Upload rejected — your session may lack the admin claim. Sign out and back in, then retry.";
+            break;
+          case "storage/canceled":
+            msg = "Upload was cancelled.";
+            break;
+          case "storage/quota-exceeded":
+            msg = "Storage quota exceeded.";
+            break;
+          default:
+            msg = `Upload failed (${err.code}) — ${err.message}`;
+        }
+        setUploadError(msg);
         setUploadProgress(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
       },
       async () => {
         const url = await getDownloadURL(task.snapshot.ref);
