@@ -145,6 +145,13 @@ export const SECTION_FIELD_GROUPS: Record<EditableSectionKey, SectionFieldGroup[
   ],
   about: [
     {
+      title: "Images",
+      fields: [
+        { key: "header_image_url", label: "Page header background", type: "image" },
+        { key: "md_image_url", label: "Managing Director photo", type: "image" },
+      ],
+    },
+    {
       title: "Page intro",
       fields: [
         { key: "sub_en", label: "Intro (English)", type: "textarea" },
@@ -360,6 +367,8 @@ export function defaultOverride(key: EditableSectionKey): SectionOverride {
     mission_ar: ar.mission,
     teamSub_en: en.teamSub,
     teamSub_ar: ar.teamSub,
+    header_image_url: IMAGES.about,
+    md_image_url: IMAGES.md,
     departments,
   };
 }
@@ -384,7 +393,7 @@ export function resolveContact(locale: Locale, o: SectionOverride | null) {
 
 export function resolveAbout(locale: Locale, o: SectionOverride | null) {
   const base = CONTENT.about[locale];
-  if (!o) return base;
+  if (!o) return { ...base, images: { header: IMAGES.about, md: IMAGES.md } };
   const pick = (en: string, ar: string) =>
     (locale === "en" ? str(o[en]) : str(o[ar])) || "";
   const rawDepts = Array.isArray(o.departments) ? (o.departments as DepartmentRow[]) : [];
@@ -404,6 +413,10 @@ export function resolveAbout(locale: Locale, o: SectionOverride | null) {
     vision: pick("vision_en", "vision_ar") || base.vision,
     mission: pick("mission_en", "mission_ar") || base.mission,
     teamSub: pick("teamSub_en", "teamSub_ar") || base.teamSub,
+    images: {
+      header: str(o.header_image_url) || IMAGES.about,
+      md: str(o.md_image_url) || IMAGES.md,
+    },
     departments,
   };
 }

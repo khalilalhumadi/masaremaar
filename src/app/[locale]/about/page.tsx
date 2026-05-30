@@ -1,6 +1,6 @@
 import { Breadcrumb, Eyebrow, PageHead, TitleParts } from "@/components/primitives";
 import { CTABand } from "@/components/sections";
-import { CONTENT, IMAGES, type Locale } from "@/lib/content";
+import { CONTENT, type Locale } from "@/lib/content";
 import { isSectionFrozen } from "@/lib/cms/freeze";
 import UnderConstruction from "@/components/UnderConstruction";
 import { getPublishedSectionData } from "@/lib/data/section-content";
@@ -22,7 +22,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         eyebrow={a.eyebrow}
         title={a.title}
         sub={a.sub}
-        bg={IMAGES.about}
+        bg={a.images.header}
         breadcrumb={<Breadcrumb locale={locale} homeLabel={nav[0].label} current={nav[1].label} />}
       />
 
@@ -31,7 +31,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         <div className="container">
           <div className="intro-block" style={{ gridTemplateColumns: "5fr 7fr" }}>
             <div>
-              <div style={{ aspectRatio: "3/4", backgroundImage: `url(${IMAGES.md})`, backgroundSize: "cover", backgroundPosition: "center", position: "relative" }}>
+              <div style={{ aspectRatio: "3/4", backgroundImage: `url(${a.images.md})`, backgroundSize: "cover", backgroundPosition: "center", position: "relative" }}>
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 20, background: "linear-gradient(180deg, transparent, rgba(12,42,30,.85))", color: "#fff" }}>
                   <div className="sig-name" style={{ color: "#fff" }}>{a.mdName}</div>
                   <div className="sig-role" style={{ color: "rgba(255,255,255,.7)" }}>{a.mdRole}</div>
