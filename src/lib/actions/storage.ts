@@ -29,9 +29,12 @@ export async function uploadProjectImage(
   const arrayBuffer = await blob.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  const bucket = getAdminStorage().bucket(
-    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!
-  );
+  const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+  if (!bucketName) {
+    return { ok: false, error: "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET is not set." };
+  }
+
+  const bucket = getAdminStorage().bucket(bucketName);
 
   try {
     await bucket.file(path).save(buffer, {
@@ -42,8 +45,13 @@ export async function uploadProjectImage(
       resumable: false,
     });
   } catch (err) {
-    console.error("uploadProjectImage — GCS save error:", err);
-    return { ok: false, error: "Storage upload failed. Check server logs." };
+    const code = (err as { code?: number }).code ?? "?";
+    const msg  = (err as { message?: string }).message ?? String(err);
+    console.error(`uploadProjectImage — GCS save error (bucket: ${bucketName}):`, err);
+    return {
+      ok: false,
+      error: `Upload failed [GCS ${code}]: ${msg} (bucket: ${bucketName})`,
+    };
   }
 
   // No download token needed — Storage rules have `allow read: if true`.
