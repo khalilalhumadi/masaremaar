@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// Firebase Storage rules for Masar Emaar CMS.
+// Public project images are world-readable (shown on the website).
+// Uploads/replacements/deletes require an authenticated admin (custom claim).
+// Everything else is locked down.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isImageUnder5MB() {
+      return request.resource.contentType.matches('image/.*')
+          && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Public project images: projects/{projectId}/{fileName}
+    match /projects/{projectId}/{fileName} {
+      allow read: if true;                          // public — displayed on the site
+      allow create, update: if isAdmin() && isImageUnder5MB();
+      allow delete: if isAdmin();
+    }
+
+    // Default deny — no public uploads, no access to any other path.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
