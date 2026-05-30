@@ -4,6 +4,7 @@ import ProjectsView from "@/components/ProjectsView";
 import { CONTENT, IMAGES, type Locale } from "@/lib/content";
 import { isSectionFrozen } from "@/lib/cms/freeze";
 import UnderConstruction from "@/components/UnderConstruction";
+import { getProjects } from "@/lib/data/projects";
 
 export const revalidate = 60;
 
@@ -11,8 +12,11 @@ export default async function ProjectsPage({ params }: { params: Promise<{ local
   const { locale: raw } = await params;
   const locale = raw as Locale;
   if (await isSectionFrozen("projects")) return <UnderConstruction locale={locale} />;
-  const p = CONTENT.projects[locale];
-  const nav = CONTENT.nav[locale];
+  const [projects, p, nav] = await Promise.all([
+    getProjects(),
+    Promise.resolve(CONTENT.projects[locale]),
+    Promise.resolve(CONTENT.nav[locale]),
+  ]);
   const en = locale === "en";
 
   return (
@@ -29,7 +33,7 @@ export default async function ProjectsPage({ params }: { params: Promise<{ local
         breadcrumb={<Breadcrumb locale={locale} homeLabel={nav[0].label} current={nav[3].label} />}
       />
 
-      <ProjectsView locale={locale} />
+      <ProjectsView locale={locale} projects={projects} />
 
       <CTABand locale={locale} />
     </div>

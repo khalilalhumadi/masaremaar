@@ -13,7 +13,7 @@ export default function ProjectModal({
   locale: Locale;
   onClose: () => void;
 }) {
-  const img = IMAGES.project[project.id] || IMAGES.hero;
+  const img = project.coverImageUrl || IMAGES.project[project.id] || IMAGES.hero;
   const ui = CONTENT.ui[locale];
 
   useEffect(() => {

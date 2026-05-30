@@ -1,42 +1,37 @@
 rules_version = '2';
-
-// Firebase Storage rules for Masar Emaar CMS.
+// Masaremaar CMS — Firebase Storage Security Rules
 //
-// Public project images are world-readable (displayed on the website via next/image).
-// Uploads, replacements, and deletes require an authenticated admin user
-// with the admin custom claim (set via scripts/set-admin-claim.mjs).
-// Every other path is locked down — no public uploads, no anonymous access.
+// DEPLOY: firebase deploy --only storage
+// Or paste directly into Firebase Console → Storage → Rules tab.
+//
+// Admin access requires custom claim (admin: true). Set via:
+//   node --env-file=.env.local scripts/set-admin-claim.mjs <uid>
 
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Admin: authenticated Firebase user with custom claim { admin: true }
+    // Helper — true when the caller is authenticated and has the admin claim.
     function isAdmin() {
       return request.auth != null
           && request.auth.token.admin == true;
     }
 
-    // Image guard: content-type must be an image and file must be under 5 MB
-    function isValidImage() {
-      return request.resource.contentType.matches('image/.*')
-          && request.resource.size < 5 * 1024 * 1024;
+    // ── Public project images ─────────────────────────────────────────────────
+    // Stored under projects/<projectId>/<filename>.
+    // Public browsers may read (so next/image can proxy them via Vercel).
+    // Only admins may upload, overwrite, or delete.
+    // Uploads are restricted to images ≤ 5 MB.
+    match /projects/{projectId}/{filename} {
+      allow read: if true;
+
+      allow write: if isAdmin()
+          && request.resource.size <= 5 * 1024 * 1024
+          && request.resource.contentType.matches('image/.*');
+
+      allow delete: if isAdmin();
     }
 
-    // ── Project cover images ────────────────────────────────────────────────
-    // Path: projects/{projectSlug}/cover.{ext}
-    // Path: projects/{projectSlug}/{fileName}
-    //
-    // Public read: images are displayed on /projects pages via next/image.
-    // Vercel caches and optimises them — Firebase Storage only serves each
-    // image variant once per Vercel cache miss (see next.config.ts remotePatterns).
-    match /projects/{projectSlug}/{fileName} {
-      allow read:          if true;                          // public — site images
-      allow create, update: if isAdmin() && isValidImage(); // admin upload/replace
-      allow delete:         if isAdmin();                    // admin delete
-    }
-
-    // ── Default deny ────────────────────────────────────────────────────────
-    // All other paths: no access for anyone, including authenticated users.
+    // ── Default — deny everything else ───────────────────────────────────────
     match /{allPaths=**} {
       allow read, write: if false;
     }

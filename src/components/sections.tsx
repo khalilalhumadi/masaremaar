@@ -62,7 +62,7 @@ export function ProjectCard({
   href?: string;
   onClick?: () => void;
 }) {
-  const img = IMAGES.project[project.id] || IMAGES.hero;
+  const img = project.coverImageUrl || IMAGES.project[project.id] || IMAGES.hero;
   const inner = (
     <>
       <div className="project-img">

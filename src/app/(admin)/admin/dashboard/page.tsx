@@ -140,7 +140,7 @@ export default function DashboardPage() {
         <nav className="admin-nav">
           <div className="admin-nav-section">Content</div>
           <Link href="/admin/dashboard" className="active">Section Control</Link>
-          <span className="admin-nav-link" style={{ padding: "9px 24px", fontSize: 13.5, color: "rgba(255,255,255,.3)", cursor: "not-allowed", display: "block" }}>Projects · Phase 2</span>
+          <Link href="/admin/projects">Projects</Link>
           <div className="admin-nav-section" style={{ marginTop: 16 }}>Site</div>
           <a href="/en" target="_blank" rel="noopener">View live site ↗</a>
           <div className="admin-nav-section" style={{ marginTop: 16 }}>Account</div>
@@ -257,18 +257,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Phase 2 notice */}
-          <div style={{
-            marginTop: 32, padding: "20px 24px",
-            background: "#f7f8f6", border: "1px solid #eaece6",
-            borderInlineStart: "3px solid var(--gold-500)",
-          }}>
-            <p style={{ margin: 0, fontSize: 13, color: "#5a5e57" }}>
-              <strong style={{ color: "#11140f" }}>Phase 2 — Projects CMS</strong> is next.
-              It will allow editing project titles, descriptions, images, categories, and sort order
-              while respecting the freeze status above.
-            </p>
-          </div>
         </div>
       </div>
     </div>

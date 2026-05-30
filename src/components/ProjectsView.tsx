@@ -5,15 +5,22 @@ import { ProjectCard } from "./sections";
 import ProjectModal from "./ProjectModal";
 import { CONTENT, type Locale, type Project } from "@/lib/content";
 
-export default function ProjectsView({ locale }: { locale: Locale }) {
+export default function ProjectsView({
+  locale,
+  projects,
+}: {
+  locale: Locale;
+  projects?: Project[];
+}) {
   const p = CONTENT.projects[locale];
+  const allProjects = projects ?? CONTENT.projectList;
   const [filter, setFilter] = useState<string>(p.filters[0]);
   const [open, setOpen] = useState<Project | null>(null);
 
   const items = useMemo(() => {
-    if (filter === p.filters[0]) return CONTENT.projectList;
-    return CONTENT.projectList.filter((x) => x.category[locale] === filter);
-  }, [filter, locale, p.filters]);
+    if (filter === p.filters[0]) return allProjects;
+    return allProjects.filter((x) => x.category[locale] === filter);
+  }, [filter, locale, p.filters, allProjects]);
 
   return (
     <>

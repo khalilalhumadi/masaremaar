@@ -451,7 +451,16 @@ export const IMAGES = {
   } as Record<string, string>,
 };
 
-export type Project = (typeof CONTENT.projectList)[number];
+export interface Project {
+  id: string;
+  title: { en: string; ar: string };
+  location: { en: string; ar: string };
+  category: { en: string; ar: string };
+  year: string;
+  featured: boolean;
+  desc: { en: string; ar: string };
+  coverImageUrl?: string;
+}
 
 // Build a locale-aware href for a nav id ("home" → "/en", others → "/en/about")
 export function navHref(locale: Locale, id: string): string {
