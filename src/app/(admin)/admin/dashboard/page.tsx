@@ -311,17 +311,40 @@ export default function DashboardPage() {
                             onToggle={handleToggle}
                             disabled={anyBusy}
                           />
-                          {s.sectionKey === "projects" ? (
-                            <Link href="/admin/projects" style={{ fontSize: 13, color: "var(--green-700)", fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap" }}>
-                              Edit →
-                            </Link>
-                          ) : isEditableSection(s.sectionKey) ? (
-                            <Link href={`/admin/sections/${s.sectionKey}`} style={{ fontSize: 13, color: "var(--green-700)", fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap" }}>
-                              Edit →
-                            </Link>
-                          ) : (
-                            <span style={{ fontSize: 12, color: "#c0c3bd", whiteSpace: "nowrap" }}>Freeze only</span>
-                          )}
+                          {(() => {
+                            // Frozen sections stay editable — the Edit link just
+                            // looks "frozen" (muted gold + lock + dashed underline).
+                            const editStyle: React.CSSProperties = {
+                              fontSize: 13,
+                              fontWeight: 500,
+                              textDecoration: "none",
+                              whiteSpace: "nowrap",
+                              color: s.isFrozen ? "var(--gold-700)" : "var(--green-700)",
+                              borderBottom: s.isFrozen ? "1px dashed var(--gold-600)" : "none",
+                              paddingBottom: s.isFrozen ? 1 : 0,
+                            };
+                            const editLabel = s.isFrozen ? "🔒 Edit →" : "Edit →";
+                            const editTitle = s.isFrozen
+                              ? "Frozen — hidden on the public site, but still editable"
+                              : undefined;
+                            if (s.sectionKey === "projects") {
+                              return (
+                                <Link href="/admin/projects" title={editTitle} style={editStyle}>
+                                  {editLabel}
+                                </Link>
+                              );
+                            }
+                            if (isEditableSection(s.sectionKey)) {
+                              return (
+                                <Link href={`/admin/sections/${s.sectionKey}`} title={editTitle} style={editStyle}>
+                                  {editLabel}
+                                </Link>
+                              );
+                            }
+                            return (
+                              <span style={{ fontSize: 12, color: "#c0c3bd", whiteSpace: "nowrap" }}>Freeze only</span>
+                            );
+                          })()}
                         </div>
                       </td>
                     </tr>
