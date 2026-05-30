@@ -468,6 +468,10 @@ html[dir="rtl"] .stat-label { font-family: var(--font-arabic); letter-spacing: 0
 /* ─── Intro block ─────────────────────────────────────────── */
 .intro-block { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(32px, 5vw, 80px); align-items: start; }
 @media (max-width: 900px) { .intro-block { grid-template-columns: 1fr; } }
+
+/* ─── Vision & Mission grid (About) ───────────────────────── */
+.vm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 4vw, 64px); }
+@media (max-width: 800px) { .vm-grid { grid-template-columns: 1fr; gap: 8px; } }
 .intro-block-body p { color: var(--ink-2); margin: 0 0 18px; font-size: 17px; line-height: 1.7; }
 .intro-block-body p.lede { font-family: var(--font-display); font-size: clamp(22px, 2.4vw, 30px); line-height: 1.4; color: var(--ink); font-weight: 500; }
 html[dir="rtl"] .intro-block-body p.lede { font-family: var(--font-arabic-display); font-weight: 600; line-height: 1.6; }

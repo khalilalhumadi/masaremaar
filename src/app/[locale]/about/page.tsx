@@ -29,7 +29,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       {/* MD statement */}
       <section className="section">
         <div className="container">
-          <div className="intro-block" style={{ gridTemplateColumns: "5fr 7fr" }}>
+          <div className="intro-block">
             <div>
               <div style={{ aspectRatio: "3/4", backgroundImage: `url(${a.images.md})`, backgroundSize: "cover", backgroundPosition: "center", position: "relative" }}>
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 20, background: "linear-gradient(180deg, transparent, rgba(12,42,30,.85))", color: "#fff" }}>
@@ -57,7 +57,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       {/* Vision & Mission */}
       <section className="section" style={{ background: "var(--cream-2)" }}>
         <div className="container">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(32px, 4vw, 64px)" }} className="vm-grid">
+          <div className="vm-grid">
             <div style={{ padding: "40px 0", borderTop: "1px solid var(--line)" }}>
               <Eyebrow>{a.visionTitle}</Eyebrow>
               <h3 className="display" style={{ fontSize: "clamp(28px, 3.4vw, 42px)", fontWeight: 400, lineHeight: 1.1, margin: "14px 0 20px" }}>
