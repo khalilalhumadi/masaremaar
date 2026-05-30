@@ -213,6 +213,8 @@ export default function SectionEditPage() {
           <div className="admin-nav-section">Content</div>
           <Link href="/admin/dashboard">Section Control</Link>
           <Link href="/admin/projects">Projects</Link>
+          <Link href="/admin/sections/about" className={key === "about" ? "active" : undefined}>About</Link>
+          <Link href="/admin/sections/contact" className={key === "contact" ? "active" : undefined}>Contact</Link>
           <div className="admin-nav-section" style={{ marginTop: 16 }}>Site</div>
           <a href="/en" target="_blank" rel="noopener">View live site ↗</a>
           <div className="admin-nav-section" style={{ marginTop: 16 }}>Account</div>

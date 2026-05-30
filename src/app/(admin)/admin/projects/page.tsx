@@ -122,6 +122,8 @@ export default function AdminProjectsPage() {
           <div className="admin-nav-section">Content</div>
           <Link href="/admin/dashboard">Section Control</Link>
           <Link href="/admin/projects" className="active">Projects</Link>
+          <Link href="/admin/sections/about">About</Link>
+          <Link href="/admin/sections/contact">Contact</Link>
           <div className="admin-nav-section" style={{ marginTop: 16 }}>Site</div>
           <a href="/en" target="_blank" rel="noopener">View live site ↗</a>
           <div className="admin-nav-section" style={{ marginTop: 16 }}>Account</div>
