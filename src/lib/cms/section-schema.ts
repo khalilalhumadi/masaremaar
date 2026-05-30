@@ -8,6 +8,7 @@
 import { CONTENT, type Locale } from "@/lib/content";
 
 export type EditableSectionKey =
+  | "home"
   | "about"
   | "contact"
   | "services"
@@ -15,6 +16,7 @@ export type EditableSectionKey =
   | "company_profile";
 
 export const EDITABLE_SECTIONS: EditableSectionKey[] = [
+  "home",
   "about",
   "contact",
   "services",
@@ -26,6 +28,17 @@ export function isEditableSection(key: string): key is EditableSectionKey {
   return (EDITABLE_SECTIONS as string[]).includes(key);
 }
 
+// Display titles for editable sections (includes "home", which is intentionally
+// NOT part of cms-types SECTION_KEYS — Home has no freeze toggle).
+export const EDITABLE_SECTION_TITLE: Record<EditableSectionKey, string> = {
+  home: "Home",
+  about: "About",
+  contact: "Contact",
+  services: "Services",
+  how_we_work: "How We Work",
+  company_profile: "Company Profile",
+};
+
 export type SectionOverride = Record<string, unknown>;
 
 // Default Company Profile PDF (also the fallback used by the public page).
@@ -33,7 +46,15 @@ export const DEFAULT_PROFILE_PDF = "/uploads/Company%20Profile%205a-compressed.p
 
 // ── Form field schema ─────────────────────────────────────────────────────────
 
-export type FieldType = "text" | "textarea" | "departments" | "service_items" | "how_steps";
+export type FieldType =
+  | "text"
+  | "textarea"
+  | "departments"
+  | "service_items"
+  | "how_steps"
+  | "home_stats"
+  | "paragraphs"
+  | "why_items";
 
 export interface SectionField {
   key: string;
@@ -48,6 +69,58 @@ export interface SectionFieldGroup {
 }
 
 export const SECTION_FIELD_GROUPS: Record<EditableSectionKey, SectionFieldGroup[]> = {
+  home: [
+    {
+      title: "Hero",
+      fields: [
+        { key: "hero_eyebrow_en", label: "Eyebrow (English)", type: "text" },
+        { key: "hero_eyebrow_ar", label: "Eyebrow (Arabic)", type: "text", dir: "rtl" },
+        { key: "hero_sub_en", label: "Sub text (English)", type: "textarea" },
+        { key: "hero_sub_ar", label: "Sub text (Arabic)", type: "textarea", dir: "rtl" },
+        { key: "hero_ctaPrimary_en", label: "Primary button (English)", type: "text" },
+        { key: "hero_ctaPrimary_ar", label: "Primary button (Arabic)", type: "text", dir: "rtl" },
+        { key: "hero_ctaSecondary_en", label: "Secondary button (English)", type: "text" },
+        { key: "hero_ctaSecondary_ar", label: "Secondary button (Arabic)", type: "text", dir: "rtl" },
+        { key: "hero_metaLabel_en", label: "Meta label (English)", type: "text" },
+        { key: "hero_metaLabel_ar", label: "Meta label (Arabic)", type: "text", dir: "rtl" },
+      ],
+    },
+    {
+      title: "Stats strip",
+      fields: [{ key: "stats", label: "Stats", type: "home_stats" }],
+    },
+    {
+      title: "Intro block",
+      fields: [
+        { key: "intro_eyebrow_en", label: "Eyebrow (English)", type: "text" },
+        { key: "intro_eyebrow_ar", label: "Eyebrow (Arabic)", type: "text", dir: "rtl" },
+        { key: "intro_lede_en", label: "Lede (English)", type: "textarea" },
+        { key: "intro_lede_ar", label: "Lede (Arabic)", type: "textarea", dir: "rtl" },
+        { key: "intro_body", label: "Body paragraphs", type: "paragraphs" },
+        { key: "intro_cta_en", label: "Link label (English)", type: "text" },
+        { key: "intro_cta_ar", label: "Link label (Arabic)", type: "text", dir: "rtl" },
+      ],
+    },
+    {
+      title: "Why Masar Emaar",
+      fields: [
+        { key: "why_eyebrow_en", label: "Eyebrow (English)", type: "text" },
+        { key: "why_eyebrow_ar", label: "Eyebrow (Arabic)", type: "text", dir: "rtl" },
+        { key: "why_items", label: "Reasons", type: "why_items" },
+      ],
+    },
+    {
+      title: "Call-to-action band",
+      fields: [
+        { key: "cta_sub_en", label: "Sub text (English)", type: "textarea" },
+        { key: "cta_sub_ar", label: "Sub text (Arabic)", type: "textarea", dir: "rtl" },
+        { key: "cta_button_en", label: "Primary button (English)", type: "text" },
+        { key: "cta_button_ar", label: "Primary button (Arabic)", type: "text", dir: "rtl" },
+        { key: "cta_button2_en", label: "WhatsApp button (English)", type: "text" },
+        { key: "cta_button2_ar", label: "WhatsApp button (Arabic)", type: "text", dir: "rtl" },
+      ],
+    },
+  ],
   contact: [
     {
       title: "Contact details",
@@ -149,9 +222,68 @@ export interface HowStepRow {
   desc_ar: string;
 }
 
+export interface HomeStatRow {
+  num: string;
+  sup: string;
+  label_en: string;
+  label_ar: string;
+}
+
+export interface ParagraphRow {
+  en: string;
+  ar: string;
+}
+
+export interface WhyItemRow {
+  title_en: string;
+  title_ar: string;
+  desc_en: string;
+  desc_ar: string;
+}
+
 // ── Defaults (pre-fill the form from content.ts) ──────────────────────────────
 
 export function defaultOverride(key: EditableSectionKey): SectionOverride {
+  if (key === "home") {
+    const heroEn = CONTENT.hero.en, heroAr = CONTENT.hero.ar;
+    const introEn = CONTENT.intro.en, introAr = CONTENT.intro.ar;
+    const whyEn = CONTENT.why.en, whyAr = CONTENT.why.ar;
+    const ctaEn = CONTENT.cta.en, ctaAr = CONTENT.cta.ar;
+    const stats: HomeStatRow[] = CONTENT.stats.en.map((s, i) => ({
+      num: s.num,
+      sup: "sup" in s ? (s.sup as string) : "",
+      label_en: s.label,
+      label_ar: CONTENT.stats.ar[i]?.label ?? "",
+    }));
+    const intro_body: ParagraphRow[] = introEn.body.map((p, i) => ({
+      en: p,
+      ar: introAr.body[i] ?? "",
+    }));
+    const why_items: WhyItemRow[] = whyEn.items.map((it, i) => ({
+      title_en: it.title,
+      title_ar: whyAr.items[i]?.title ?? "",
+      desc_en: it.desc,
+      desc_ar: whyAr.items[i]?.desc ?? "",
+    }));
+    return {
+      hero_eyebrow_en: heroEn.eyebrow, hero_eyebrow_ar: heroAr.eyebrow,
+      hero_sub_en: heroEn.sub, hero_sub_ar: heroAr.sub,
+      hero_ctaPrimary_en: heroEn.ctaPrimary, hero_ctaPrimary_ar: heroAr.ctaPrimary,
+      hero_ctaSecondary_en: heroEn.ctaSecondary, hero_ctaSecondary_ar: heroAr.ctaSecondary,
+      hero_metaLabel_en: heroEn.metaLabel, hero_metaLabel_ar: heroAr.metaLabel,
+      stats,
+      intro_eyebrow_en: introEn.eyebrow, intro_eyebrow_ar: introAr.eyebrow,
+      intro_lede_en: introEn.lede, intro_lede_ar: introAr.lede,
+      intro_body,
+      intro_cta_en: introEn.cta, intro_cta_ar: introAr.cta,
+      why_eyebrow_en: whyEn.eyebrow, why_eyebrow_ar: whyAr.eyebrow,
+      why_items,
+      cta_sub_en: ctaEn.sub, cta_sub_ar: ctaAr.sub,
+      cta_button_en: ctaEn.cta, cta_button_ar: ctaAr.cta,
+      cta_button2_en: ctaEn.ctaSecondary, cta_button2_ar: ctaAr.ctaSecondary,
+    };
+  }
+
   if (key === "contact") {
     return {
       email: CONTENT.contact.en.email,
@@ -317,4 +449,84 @@ export function resolveHow(locale: Locale, o: SectionOverride | null) {
 export function resolveProfilePdf(o: SectionOverride | null): string {
   if (!o) return DEFAULT_PROFILE_PDF;
   return str(o.pdfUrl) || DEFAULT_PROFILE_PDF;
+}
+
+// ── Home ──────────────────────────────────────────────────────────────────────
+
+export interface ResolvedStat {
+  num: string;
+  sup: string;
+  label: string;
+}
+
+export function resolveHome(locale: Locale, o: SectionOverride | null) {
+  const baseHero = CONTENT.hero[locale];
+  const baseStats = CONTENT.stats[locale];
+  const baseIntro = CONTENT.intro[locale];
+  const baseWhy = CONTENT.why[locale];
+  const pick = (en: string, ar: string) =>
+    (locale === "en" ? str(o?.[en]) : str(o?.[ar])) || "";
+
+  const rawStats = Array.isArray(o?.stats) ? (o!.stats as HomeStatRow[]) : [];
+  const stats: ResolvedStat[] =
+    rawStats.length > 0
+      ? rawStats.map((s) => ({
+          num: str(s.num),
+          sup: str(s.sup),
+          label: (locale === "en" ? str(s.label_en) : str(s.label_ar)) || "",
+        }))
+      : baseStats.map((s) => ({
+          num: s.num,
+          sup: "sup" in s ? (s.sup as string) : "",
+          label: s.label,
+        }));
+
+  const rawBody = Array.isArray(o?.intro_body) ? (o!.intro_body as ParagraphRow[]) : [];
+  const introBody =
+    rawBody.length > 0
+      ? rawBody.map((p) => (locale === "en" ? str(p.en) : str(p.ar))).filter(Boolean)
+      : [...baseIntro.body];
+
+  const rawWhy = Array.isArray(o?.why_items) ? (o!.why_items as WhyItemRow[]) : [];
+  const whyItems =
+    rawWhy.length > 0
+      ? rawWhy.map((it) => ({
+          title: (locale === "en" ? str(it.title_en) : str(it.title_ar)) || "",
+          desc: (locale === "en" ? str(it.desc_en) : str(it.desc_ar)) || "",
+        }))
+      : baseWhy.items.map((it) => ({ title: it.title, desc: it.desc }));
+
+  return {
+    hero: {
+      eyebrow: pick("hero_eyebrow_en", "hero_eyebrow_ar") || baseHero.eyebrow,
+      sub: pick("hero_sub_en", "hero_sub_ar") || baseHero.sub,
+      ctaPrimary: pick("hero_ctaPrimary_en", "hero_ctaPrimary_ar") || baseHero.ctaPrimary,
+      ctaSecondary: pick("hero_ctaSecondary_en", "hero_ctaSecondary_ar") || baseHero.ctaSecondary,
+      metaLabel: pick("hero_metaLabel_en", "hero_metaLabel_ar") || baseHero.metaLabel,
+    },
+    stats,
+    intro: {
+      eyebrow: pick("intro_eyebrow_en", "intro_eyebrow_ar") || baseIntro.eyebrow,
+      lede: pick("intro_lede_en", "intro_lede_ar") || baseIntro.lede,
+      body: introBody.length > 0 ? introBody : [...baseIntro.body],
+      cta: pick("intro_cta_en", "intro_cta_ar") || baseIntro.cta,
+    },
+    why: {
+      eyebrow: pick("why_eyebrow_en", "why_eyebrow_ar") || baseWhy.eyebrow,
+      items: whyItems,
+    },
+  };
+}
+
+/** Home CTA band text override (title stays in content.ts). */
+export function resolveHomeCta(locale: Locale, o: SectionOverride | null) {
+  const base = CONTENT.cta[locale];
+  if (!o) return { sub: base.sub, cta: base.cta, ctaSecondary: base.ctaSecondary };
+  const pick = (en: string, ar: string) =>
+    (locale === "en" ? str(o[en]) : str(o[ar])) || "";
+  return {
+    sub: pick("cta_sub_en", "cta_sub_ar") || base.sub,
+    cta: pick("cta_button_en", "cta_button_ar") || base.cta,
+    ctaSecondary: pick("cta_button2_en", "cta_button2_ar") || base.ctaSecondary,
+  };
 }

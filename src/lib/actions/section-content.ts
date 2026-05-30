@@ -68,10 +68,16 @@ export async function publishSection(
     { merge: true }
   );
 
-  const path = SECTION_PUBLIC_PATH[key];
-  if (path) {
-    revalidatePath(`/en/${path}`);
-    revalidatePath(`/ar/${path}`);
+  if (key === "home") {
+    // Home lives at the locale root.
+    revalidatePath("/en");
+    revalidatePath("/ar");
+  } else {
+    const path = SECTION_PUBLIC_PATH[key];
+    if (path) {
+      revalidatePath(`/en/${path}`);
+      revalidatePath(`/ar/${path}`);
+    }
   }
   revalidatePath(`/admin/sections/${key}`);
   return { ok: true };

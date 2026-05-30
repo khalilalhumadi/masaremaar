@@ -130,22 +130,33 @@ export function FeaturedProjectsSection({ locale }: { locale: Locale }) {
 // ─────────────────────────────────────────────────────────────
 // Why choose
 // ─────────────────────────────────────────────────────────────
-export function WhySection({ locale }: { locale: Locale }) {
+export function WhySection({
+  locale,
+  eyebrow,
+  items,
+}: {
+  locale: Locale;
+  // Optional CMS overrides; when omitted, content.ts defaults are used.
+  eyebrow?: string;
+  items?: { title: string; desc: string }[];
+}) {
   const w = CONTENT.why[locale];
+  const eyebrowText = eyebrow ?? w.eyebrow;
+  const whyItems = items ?? w.items;
   return (
     <section className="section why-section">
       <div className="container">
         <div style={{ maxWidth: 720 }}>
-          <Eyebrow>{w.eyebrow}</Eyebrow>
+          <Eyebrow>{eyebrowText}</Eyebrow>
           <h2 className="section-title display" style={{ color: "#fff", marginTop: 14 }}>
             <TitleParts parts={w.title} />
           </h2>
         </div>
         <div className="why-grid">
-          {w.items.map((it, i) => (
+          {whyItems.map((it, i) => (
             <div className="why-item" key={i}>
               <div className="why-num">
-                {String(i + 1).padStart(2, "0")} / {String(w.items.length).padStart(2, "0")}
+                {String(i + 1).padStart(2, "0")} / {String(whyItems.length).padStart(2, "0")}
               </div>
               <h3 className="why-title">{it.title}</h3>
               <p className="why-desc">{it.desc}</p>
@@ -209,8 +220,22 @@ export function HowStepsSection({
 // ─────────────────────────────────────────────────────────────
 // CTA band
 // ─────────────────────────────────────────────────────────────
-export function CTABand({ locale }: { locale: Locale }) {
+export function CTABand({
+  locale,
+  sub,
+  cta,
+  ctaSecondary,
+}: {
+  locale: Locale;
+  // Optional CMS overrides (Home page). Title stays in content.ts.
+  sub?: string;
+  cta?: string;
+  ctaSecondary?: string;
+}) {
   const c = CONTENT.cta[locale];
+  const subText = sub ?? c.sub;
+  const ctaText = cta ?? c.cta;
+  const ctaSecondaryText = ctaSecondary ?? c.ctaSecondary;
   return (
     <section className="cta-band">
       <div className="container">
@@ -218,10 +243,10 @@ export function CTABand({ locale }: { locale: Locale }) {
           <TitleParts parts={c.title} />
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "flex-start" }}>
-          <p style={{ margin: 0, fontSize: 17, maxWidth: "36ch", color: "rgba(12,42,30,.78)" }}>{c.sub}</p>
+          <p style={{ margin: 0, fontSize: 17, maxWidth: "36ch", color: "rgba(12,42,30,.78)" }}>{subText}</p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <Link className="btn btn-primary" href={navHref(locale, "contact")}>
-              {c.cta} <Icon.arrow className="btn-arrow" width={16} height={16} />
+              {ctaText} <Icon.arrow className="btn-arrow" width={16} height={16} />
             </Link>
             <a
               className="btn btn-outline"
@@ -230,7 +255,7 @@ export function CTABand({ locale }: { locale: Locale }) {
               rel="noopener noreferrer"
               style={{ background: "transparent", borderColor: "var(--green-900)", color: "var(--green-900)" }}
             >
-              <Icon.whatsapp width={16} height={16} /> {c.ctaSecondary}
+              <Icon.whatsapp width={16} height={16} /> {ctaSecondaryText}
             </a>
           </div>
         </div>

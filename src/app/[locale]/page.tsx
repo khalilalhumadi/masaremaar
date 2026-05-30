@@ -3,15 +3,30 @@ import { Icon } from "@/components/icons";
 import { Eyebrow, SectionHead, TitleParts } from "@/components/primitives";
 import { WhySection, CTABand } from "@/components/sections";
 import { CONTENT, IMAGES, navHref, type Locale } from "@/lib/content";
+import { getPublishedSectionData } from "@/lib/data/section-content";
+import { resolveHome, resolveHomeCta, resolveAbout } from "@/lib/cms/section-schema";
+
+export const revalidate = 60;
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = raw as Locale;
 
-  const h = CONTENT.hero[locale];
-  const stats = CONTENT.stats[locale];
-  const intro = CONTENT.intro[locale];
-  const about = CONTENT.about[locale];
+  // Home content (hero/stats/intro/why/cta) + reuse About data for the signature.
+  const [homeData, aboutData] = await Promise.all([
+    getPublishedSectionData("home"),
+    getPublishedSectionData("about"),
+  ]);
+  const home = resolveHome(locale, homeData);
+  const cta = resolveHomeCta(locale, homeData);
+  const about = resolveAbout(locale, aboutData);
+
+  const h = home.hero;
+  const stats = home.stats;
+  const intro = home.intro;
+  // Hero/intro/why decorative headlines (TitlePart[]) stay in content.ts.
+  const heroTitle = CONTENT.hero[locale].title;
+  const introTitle = CONTENT.intro[locale].title;
 
   return (
     <div className="page-enter">
@@ -21,7 +36,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <div className="container hero-inner">
           <Eyebrow>{h.eyebrow}</Eyebrow>
           <h1 className="hero-title display">
-            <TitleParts parts={h.title} />
+            <TitleParts parts={heroTitle} />
           </h1>
           <p className="hero-sub">{h.sub}</p>
           <div className="hero-actions">
@@ -49,7 +64,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <div className="stat" key={i}>
                 <div className="stat-num">
                   {s.num}
-                  {"sup" in s && s.sup && <sup>{s.sup}</sup>}
+                  {s.sup && <sup>{s.sup}</sup>}
                 </div>
                 <div className="stat-label">{s.label}</div>
               </div>
@@ -61,7 +76,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* Intro block */}
       <section className="section">
         <div className="container">
-          <SectionHead eyebrow={intro.eyebrow} title={intro.title} link={intro.cta} href={navHref(locale, "about")} />
+          <SectionHead eyebrow={intro.eyebrow} title={introTitle} link={intro.cta} href={navHref(locale, "about")} />
           <div className="intro-block">
             <div>
               <div style={{ aspectRatio: "4/5", backgroundImage: `url(${IMAGES.about})`, backgroundSize: "cover", backgroundPosition: "center", position: "relative" }}>
@@ -88,8 +103,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      <WhySection locale={locale} />
-      <CTABand locale={locale} />
+      <WhySection locale={locale} eyebrow={home.why.eyebrow} items={home.why.items} />
+      <CTABand locale={locale} sub={cta.sub} cta={cta.cta} ctaSecondary={cta.ctaSecondary} />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { getClientAuth, getClientDb } from "@/lib/firebase/client";
 import { saveSectionDraft, publishSection } from "@/lib/actions/section-content";
 import {
   SECTION_FIELD_GROUPS,
+  EDITABLE_SECTION_TITLE,
   defaultOverride,
   isEditableSection,
   type EditableSectionKey,
@@ -17,8 +18,10 @@ import {
   type DepartmentRow,
   type ServiceItemRow,
   type HowStepRow,
+  type HomeStatRow,
+  type ParagraphRow,
+  type WhyItemRow,
 } from "@/lib/cms/section-schema";
-import { SECTION_TITLES } from "@/lib/cms-types";
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
@@ -181,6 +184,107 @@ function HowStepsEditor({
   );
 }
 
+// Fixed-list editor for the home stats strip (num/sup shared, label bilingual).
+function HomeStatsEditor({
+  rows,
+  onChange,
+}: {
+  rows: HomeStatRow[];
+  onChange: (rows: HomeStatRow[]) => void;
+}) {
+  function update(i: number, patch: Partial<HomeStatRow>) {
+    onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  }
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {rows.map((r, i) => (
+        <div key={i} style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 16, background: "#fafafa" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10 }}>Stat #{i + 1}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <input type="text" placeholder="Number (e.g. 2017)" value={r.num} onChange={(e) => update(i, { num: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder="Superscript (e.g. +)" value={r.sup} onChange={(e) => update(i, { sup: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder="Label (English)" value={r.label_en} onChange={(e) => update(i, { label_en: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder="التسمية (Arabic)" dir="rtl" value={r.label_ar} onChange={(e) => update(i, { label_ar: e.target.value })} style={inputStyle} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Repeatable paragraphs editor (EN + AR kept parallel; add/remove).
+function ParagraphsEditor({
+  rows,
+  onChange,
+}: {
+  rows: ParagraphRow[];
+  onChange: (rows: ParagraphRow[]) => void;
+}) {
+  function update(i: number, patch: Partial<ParagraphRow>) {
+    onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  }
+  function remove(i: number) {
+    onChange(rows.filter((_, idx) => idx !== i));
+  }
+  function add() {
+    onChange([...rows, { en: "", ar: "" }]);
+  }
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <label style={{ display: "block", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "#374151", marginBottom: 10 }}>
+        Body paragraphs
+      </label>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {rows.map((r, i) => (
+          <div key={i} style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 16, background: "#fafafa" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>¶ {i + 1}</span>
+              <button type="button" onClick={() => remove(i)} style={{ fontSize: 12, color: "#dc2626", background: "none", border: 0, cursor: "pointer" }}>
+                Remove
+              </button>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <textarea placeholder="Paragraph (English)" rows={3} value={r.en} onChange={(e) => update(i, { en: e.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
+              <textarea placeholder="فقرة (Arabic)" dir="rtl" rows={3} value={r.ar} onChange={(e) => update(i, { ar: e.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <button type="button" onClick={add} style={{ marginTop: 12, fontSize: 13, color: "var(--green-700, #15803d)", background: "none", border: "1px dashed #d1d5db", borderRadius: 6, padding: "8px 14px", cursor: "pointer", width: "100%" }}>
+        + Add paragraph
+      </button>
+    </div>
+  );
+}
+
+// Fixed-list editor for the 6 "Why" reasons (title + desc, bilingual).
+function WhyItemsEditor({
+  rows,
+  onChange,
+}: {
+  rows: WhyItemRow[];
+  onChange: (rows: WhyItemRow[]) => void;
+}) {
+  function update(i: number, patch: Partial<WhyItemRow>) {
+    onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  }
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {rows.map((r, i) => (
+        <div key={i} style={{ border: "1px solid #e5e7eb", borderRadius: 8, padding: 16, background: "#fafafa" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10 }}>Reason #{i + 1}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <input type="text" placeholder="Title (English)" value={r.title_en} onChange={(e) => update(i, { title_en: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder="العنوان (Arabic)" dir="rtl" value={r.title_ar} onChange={(e) => update(i, { title_ar: e.target.value })} style={inputStyle} />
+            <textarea placeholder="Description (English)" rows={2} value={r.desc_en} onChange={(e) => update(i, { desc_en: e.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
+            <textarea placeholder="الوصف (Arabic)" dir="rtl" rows={2} value={r.desc_ar} onChange={(e) => update(i, { desc_ar: e.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function SectionEditPage() {
   const router = useRouter();
   const params = useParams();
@@ -260,7 +364,7 @@ export default function SectionEditPage() {
     setBusy(null);
   }
 
-  const title = SECTION_TITLES[key as EditableSectionKey] ?? key;
+  const title = editable ? EDITABLE_SECTION_TITLE[key as EditableSectionKey] : key;
 
   return (
     <div className="admin-shell">
@@ -275,6 +379,7 @@ export default function SectionEditPage() {
           <div className="admin-nav-section">Content</div>
           <Link href="/admin/dashboard">Section Control</Link>
           <Link href="/admin/projects">Projects</Link>
+          <Link href="/admin/sections/home" className={key === "home" ? "active" : undefined}>Home</Link>
           <Link href="/admin/sections/about" className={key === "about" ? "active" : undefined}>About</Link>
           <Link href="/admin/sections/contact" className={key === "contact" ? "active" : undefined}>Contact</Link>
           <Link href="/admin/sections/services" className={key === "services" ? "active" : undefined}>Services</Link>
@@ -360,6 +465,33 @@ export default function SectionEditPage() {
                             key={field.key}
                             rows={Array.isArray(data.steps) ? (data.steps as HowStepRow[]) : []}
                             onChange={(rows) => setField("steps", rows)}
+                          />
+                        );
+                      }
+                      if (field.type === "home_stats") {
+                        return (
+                          <HomeStatsEditor
+                            key={field.key}
+                            rows={Array.isArray(data.stats) ? (data.stats as HomeStatRow[]) : []}
+                            onChange={(rows) => setField("stats", rows)}
+                          />
+                        );
+                      }
+                      if (field.type === "paragraphs") {
+                        return (
+                          <ParagraphsEditor
+                            key={field.key}
+                            rows={Array.isArray(data[field.key]) ? (data[field.key] as ParagraphRow[]) : []}
+                            onChange={(rows) => setField(field.key, rows)}
+                          />
+                        );
+                      }
+                      if (field.type === "why_items") {
+                        return (
+                          <WhyItemsEditor
+                            key={field.key}
+                            rows={Array.isArray(data.why_items) ? (data.why_items as WhyItemRow[]) : []}
+                            onChange={(rows) => setField("why_items", rows)}
                           />
                         );
                       }

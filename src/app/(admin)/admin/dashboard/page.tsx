@@ -142,6 +142,7 @@ export default function DashboardPage() {
           <div className="admin-nav-section">Content</div>
           <Link href="/admin/dashboard" className="active">Section Control</Link>
           <Link href="/admin/projects">Projects</Link>
+          <Link href="/admin/sections/home">Home</Link>
           <Link href="/admin/sections/about">About</Link>
           <Link href="/admin/sections/contact">Contact</Link>
           <Link href="/admin/sections/services">Services</Link>
