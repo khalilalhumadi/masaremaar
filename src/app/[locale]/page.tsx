@@ -32,7 +32,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <div className="page-enter">
       {/* Hero (full) */}
       <section className="hero hero--full">
-        <div className="hero-bg" style={{ backgroundImage: `url(${IMAGES.hero})` }} />
+        <div className="hero-bg" style={{ backgroundImage: `url(${home.images.hero})` }} />
         <div className="container hero-inner">
           <Eyebrow>{h.eyebrow}</Eyebrow>
           <h1 className="hero-title display">
@@ -79,7 +79,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <SectionHead eyebrow={intro.eyebrow} title={introTitle} link={intro.cta} href={navHref(locale, "about")} />
           <div className="intro-block">
             <div>
-              <div style={{ aspectRatio: "4/5", backgroundImage: `url(${IMAGES.about})`, backgroundSize: "cover", backgroundPosition: "center", position: "relative" }}>
+              <div style={{ aspectRatio: "4/5", backgroundImage: `url(${home.images.intro})`, backgroundSize: "cover", backgroundPosition: "center", position: "relative" }}>
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(12,42,30,0) 60%, rgba(12,42,30,.55) 100%)" }} />
                 <div style={{ position: "absolute", bottom: 24, insetInlineStart: 24, color: "#fff", fontFamily: "var(--font-display)", fontSize: 56, lineHeight: 1, letterSpacing: "-0.02em" }}>
                   Est. <em style={{ color: "var(--gold-400)", fontStyle: "italic" }}>2017</em>

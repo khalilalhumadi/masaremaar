@@ -5,7 +5,7 @@
 // cms_sections/{key}.publishedData (live) and .draftData (work in progress).
 // The decorative headlines (TitlePart[] with gold accents) stay in content.ts.
 
-import { CONTENT, type Locale } from "@/lib/content";
+import { CONTENT, IMAGES, type Locale } from "@/lib/content";
 
 export type EditableSectionKey =
   | "home"
@@ -49,6 +49,7 @@ export const DEFAULT_PROFILE_PDF = "/uploads/Company%20Profile%205a-compressed.p
 export type FieldType =
   | "text"
   | "textarea"
+  | "image"
   | "departments"
   | "service_items"
   | "how_steps"
@@ -83,6 +84,13 @@ export const SECTION_FIELD_GROUPS: Record<EditableSectionKey, SectionFieldGroup[
         { key: "hero_ctaSecondary_ar", label: "Secondary button (Arabic)", type: "text", dir: "rtl" },
         { key: "hero_metaLabel_en", label: "Meta label (English)", type: "text" },
         { key: "hero_metaLabel_ar", label: "Meta label (Arabic)", type: "text", dir: "rtl" },
+      ],
+    },
+    {
+      title: "Images",
+      fields: [
+        { key: "hero_image_url", label: "Hero background image", type: "image" },
+        { key: "intro_image_url", label: "Intro block image", type: "image" },
       ],
     },
     {
@@ -271,6 +279,8 @@ export function defaultOverride(key: EditableSectionKey): SectionOverride {
       hero_ctaPrimary_en: heroEn.ctaPrimary, hero_ctaPrimary_ar: heroAr.ctaPrimary,
       hero_ctaSecondary_en: heroEn.ctaSecondary, hero_ctaSecondary_ar: heroAr.ctaSecondary,
       hero_metaLabel_en: heroEn.metaLabel, hero_metaLabel_ar: heroAr.metaLabel,
+      hero_image_url: IMAGES.hero,
+      intro_image_url: IMAGES.about,
       stats,
       intro_eyebrow_en: introEn.eyebrow, intro_eyebrow_ar: introAr.eyebrow,
       intro_lede_en: introEn.lede, intro_lede_ar: introAr.lede,
@@ -503,6 +513,10 @@ export function resolveHome(locale: Locale, o: SectionOverride | null) {
       ctaPrimary: pick("hero_ctaPrimary_en", "hero_ctaPrimary_ar") || baseHero.ctaPrimary,
       ctaSecondary: pick("hero_ctaSecondary_en", "hero_ctaSecondary_ar") || baseHero.ctaSecondary,
       metaLabel: pick("hero_metaLabel_en", "hero_metaLabel_ar") || baseHero.metaLabel,
+    },
+    images: {
+      hero: str(o?.hero_image_url) || IMAGES.hero,
+      intro: str(o?.intro_image_url) || IMAGES.about,
     },
     stats,
     intro: {

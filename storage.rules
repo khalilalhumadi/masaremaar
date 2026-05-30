@@ -31,6 +31,19 @@ service firebase.storage {
       allow delete: if isAdmin();
     }
 
+    // ── Public section images (Phase 5) ──────────────────────────────────────
+    // Stored under sections/<sectionKey>/<filename> (e.g. sections/home/...).
+    // Same policy as project images: public read, admin-only image writes ≤ 5 MB.
+    match /sections/{sectionKey}/{filename} {
+      allow read: if true;
+
+      allow write: if isAdmin()
+          && request.resource.size <= 5 * 1024 * 1024
+          && request.resource.contentType.matches('image/.*');
+
+      allow delete: if isAdmin();
+    }
+
     // ── Default — deny everything else ───────────────────────────────────────
     match /{allPaths=**} {
       allow read, write: if false;
