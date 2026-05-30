@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { Eyebrow, SectionHead, TitleParts } from "@/components/primitives";
 import { WhySection, CTABand } from "@/components/sections";
-import { CONTENT, IMAGES, navHref, type Locale } from "@/lib/content";
+import { CONTENT, navHref, type Locale } from "@/lib/content";
 import { getPublishedSectionData } from "@/lib/data/section-content";
 import { resolveHome, resolveHomeCta, resolveAbout } from "@/lib/cms/section-schema";
 
@@ -92,7 +92,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <p key={i}>{p}</p>
               ))}
               <div className="signature">
-                <div style={{ width: 56, height: 56, background: "var(--green-50)", backgroundImage: `url(${IMAGES.md})`, backgroundSize: "cover", backgroundPosition: "center", borderRadius: "50%" }} />
+                <div style={{ width: 56, height: 56, background: "var(--green-50)", backgroundImage: `url(${home.images.md})`, backgroundSize: "cover", backgroundPosition: "center", borderRadius: "50%" }} />
                 <div>
                   <div className="sig-name">{about.mdName}</div>
                   <div className="sig-role">{about.mdRole}</div>

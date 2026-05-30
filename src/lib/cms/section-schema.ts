@@ -91,6 +91,7 @@ export const SECTION_FIELD_GROUPS: Record<EditableSectionKey, SectionFieldGroup[
       fields: [
         { key: "hero_image_url", label: "Hero background image", type: "image" },
         { key: "intro_image_url", label: "Intro block image", type: "image" },
+        { key: "md_image_url", label: "Managing Director photo (signature avatar)", type: "image" },
       ],
     },
     {
@@ -281,6 +282,7 @@ export function defaultOverride(key: EditableSectionKey): SectionOverride {
       hero_metaLabel_en: heroEn.metaLabel, hero_metaLabel_ar: heroAr.metaLabel,
       hero_image_url: IMAGES.hero,
       intro_image_url: IMAGES.about,
+      md_image_url: IMAGES.md,
       stats,
       intro_eyebrow_en: introEn.eyebrow, intro_eyebrow_ar: introAr.eyebrow,
       intro_lede_en: introEn.lede, intro_lede_ar: introAr.lede,
@@ -517,6 +519,7 @@ export function resolveHome(locale: Locale, o: SectionOverride | null) {
     images: {
       hero: str(o?.hero_image_url) || IMAGES.hero,
       intro: str(o?.intro_image_url) || IMAGES.about,
+      md: str(o?.md_image_url) || IMAGES.md,
     },
     stats,
     intro: {
