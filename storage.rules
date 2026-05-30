@@ -1,30 +1,42 @@
 rules_version = '2';
 
 // Firebase Storage rules for Masar Emaar CMS.
-// Public project images are world-readable (shown on the website).
-// Uploads/replacements/deletes require an authenticated admin (custom claim).
-// Everything else is locked down.
+//
+// Public project images are world-readable (displayed on the website via next/image).
+// Uploads, replacements, and deletes require an authenticated admin user
+// with the admin custom claim (set via scripts/set-admin-claim.mjs).
+// Every other path is locked down — no public uploads, no anonymous access.
 
 service firebase.storage {
   match /b/{bucket}/o {
 
+    // Admin: authenticated Firebase user with custom claim { admin: true }
     function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
+      return request.auth != null
+          && request.auth.token.admin == true;
     }
 
-    function isImageUnder5MB() {
+    // Image guard: content-type must be an image and file must be under 5 MB
+    function isValidImage() {
       return request.resource.contentType.matches('image/.*')
           && request.resource.size < 5 * 1024 * 1024;
     }
 
-    // Public project images: projects/{projectId}/{fileName}
-    match /projects/{projectId}/{fileName} {
-      allow read: if true;                          // public — displayed on the site
-      allow create, update: if isAdmin() && isImageUnder5MB();
-      allow delete: if isAdmin();
+    // ── Project cover images ────────────────────────────────────────────────
+    // Path: projects/{projectSlug}/cover.{ext}
+    // Path: projects/{projectSlug}/{fileName}
+    //
+    // Public read: images are displayed on /projects pages via next/image.
+    // Vercel caches and optimises them — Firebase Storage only serves each
+    // image variant once per Vercel cache miss (see next.config.ts remotePatterns).
+    match /projects/{projectSlug}/{fileName} {
+      allow read:          if true;                          // public — site images
+      allow create, update: if isAdmin() && isValidImage(); // admin upload/replace
+      allow delete:         if isAdmin();                    // admin delete
     }
 
-    // Default deny — no public uploads, no access to any other path.
+    // ── Default deny ────────────────────────────────────────────────────────
+    // All other paths: no access for anyone, including authenticated users.
     match /{allPaths=**} {
       allow read, write: if false;
     }
