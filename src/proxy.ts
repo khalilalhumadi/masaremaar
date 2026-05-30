@@ -1,11 +1,12 @@
-// middleware.ts — fast edge check for /admin/* routes.
+// proxy.ts — fast edge check for /admin/* routes.
+// Next.js 16 renamed middleware → proxy (same functionality, new convention).
 // Only verifies cookie EXISTENCE (Admin SDK cannot run on the edge).
 // Full session verification (admin claim + revocation check) happens in
-// src/app/admin/(protected)/layout.tsx via Firebase Admin SDK.
+// the session API route via Firebase Admin SDK.
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = request.cookies.get("__session");
 
