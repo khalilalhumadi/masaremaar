@@ -1,10 +1,15 @@
 import { Breadcrumb, Eyebrow, PageHead } from "@/components/primitives";
 import { CTABand, HowStepsSection } from "@/components/sections";
 import { CONTENT, IMAGES, type Locale } from "@/lib/content";
+import { isSectionFrozen } from "@/lib/cms/freeze";
+import UnderConstruction from "@/components/UnderConstruction";
+
+export const revalidate = 60;
 
 export default async function HowPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = raw as Locale;
+  if (await isSectionFrozen("how_we_work")) return <UnderConstruction locale={locale} />;
   const h = CONTENT.how[locale];
   const nav = CONTENT.nav[locale];
   const en = locale === "en";

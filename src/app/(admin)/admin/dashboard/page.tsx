@@ -169,9 +169,10 @@ export default function DashboardPage() {
         <div className="admin-body">
           {/* Intro */}
           <p style={{ margin: "0 0 32px", fontSize: 14, color: "#5a5e57", maxWidth: 640 }}>
-            Use <strong>Freeze</strong> to lock a section so it cannot be edited or published.
-            Frozen sections still display their current approved content on the public site.
-            Unfreeze to allow edits.
+            <strong>🔒 Frozen</strong> — public visitors see an <em>Under Construction</em> page
+            instead of the real content. Use this to hide a section while it is being prepared.{" "}
+            <strong>🔓 Unfrozen</strong> — the real content is visible to all visitors.
+            Changes take effect within 60 seconds.
           </p>
 
           {/* Error */}

@@ -2,10 +2,15 @@ import { Icon } from "@/components/icons";
 import { Breadcrumb, PageHead } from "@/components/primitives";
 import ContactForm from "@/components/ContactForm";
 import { CONTENT, IMAGES, type Locale } from "@/lib/content";
+import { isSectionFrozen } from "@/lib/cms/freeze";
+import UnderConstruction from "@/components/UnderConstruction";
+
+export const revalidate = 60;
 
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = raw as Locale;
+  if (await isSectionFrozen("contact")) return <UnderConstruction locale={locale} />;
   const c = CONTENT.contact[locale];
   const nav = CONTENT.nav[locale];
   const en = locale === "en";

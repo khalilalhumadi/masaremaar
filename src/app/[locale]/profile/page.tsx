@@ -3,6 +3,10 @@ import { Icon } from "@/components/icons";
 import { Breadcrumb, PageHead } from "@/components/primitives";
 import { CTABand } from "@/components/sections";
 import { CONTENT, IMAGES, navHref, type Locale, type TitlePart } from "@/lib/content";
+import { isSectionFrozen } from "@/lib/cms/freeze";
+import UnderConstruction from "@/components/UnderConstruction";
+
+export const revalidate = 60;
 
 const PROFILE_PDF = "/uploads/Company%20Profile%205a-compressed.pdf";
 
@@ -21,6 +25,7 @@ const PREVIEWS: { en: string; ar: string }[] = [
 export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = raw as Locale;
+  if (await isSectionFrozen("company_profile")) return <UnderConstruction locale={locale} />;
   const nav = CONTENT.nav[locale];
   const ui = CONTENT.ui[locale];
   const en = locale === "en";

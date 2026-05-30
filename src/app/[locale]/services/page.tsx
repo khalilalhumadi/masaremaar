@@ -3,10 +3,15 @@ import { Icon, type IconName } from "@/components/icons";
 import { Breadcrumb, Eyebrow, PageHead } from "@/components/primitives";
 import { CTABand, ServicesSection } from "@/components/sections";
 import { CONTENT, IMAGES, navHref, type Locale } from "@/lib/content";
+import { isSectionFrozen } from "@/lib/cms/freeze";
+import UnderConstruction from "@/components/UnderConstruction";
+
+export const revalidate = 60;
 
 export default async function ServicesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = raw as Locale;
+  if (await isSectionFrozen("services")) return <UnderConstruction locale={locale} />;
   const svc = CONTENT.services[locale];
   const nav = CONTENT.nav[locale];
   const en = locale === "en";
