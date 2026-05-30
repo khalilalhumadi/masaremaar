@@ -4,10 +4,10 @@ import { useEffect, useState, useRef } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ref as storageRef, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, getDoc } from "firebase/firestore";
-import { getClientAuth, getClientDb, getClientStorage } from "@/lib/firebase/client";
+import { getClientAuth, getClientDb } from "@/lib/firebase/client";
 import { saveProject } from "@/lib/actions/projects";
+import { uploadProjectImage } from "@/lib/actions/storage";
 import { CATEGORY_KEYS, CATEGORY_LABELS } from "@/lib/cms-types";
 import type { CmsProject, CategoryKey } from "@/lib/cms-types";
 
@@ -98,7 +98,7 @@ export default function ProjectEditPage() {
   const [coverImageUrl, setCoverImageUrl] = useState("");
 
   // Image upload
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -212,7 +212,6 @@ export default function ProjectEditPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Client-side validation
     if (!file.type.startsWith("image/")) {
       setUploadError("Only image files are allowed.");
       return;
@@ -223,58 +222,20 @@ export default function ProjectEditPage() {
     }
 
     setUploadError(null);
-    setUploadProgress(0);
+    setUploading(true);
 
-    // Force token refresh so the admin custom claim is always current.
-    // Without this, a token issued before the claim was set would be rejected.
-    try {
-      const currentUser = getClientAuth().currentUser;
-      if (currentUser) await currentUser.getIdToken(true);
-    } catch {
-      // Non-fatal — proceed with existing token
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const result = await uploadProjectImage(projectId, formData);
+
+    if (!result.ok) {
+      setUploadError(result.error ?? "Upload failed.");
+    } else {
+      setCoverImageUrl(result.url!);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
-
-    const storage = getClientStorage();
-    const ext = file.name.split(".").pop() ?? "jpg";
-    const path = `projects/${projectId}/${Date.now()}.${ext}`;
-    const ref = storageRef(storage, path);
-    const task = uploadBytesResumable(ref, file, { contentType: file.type });
-
-    task.on(
-      "state_changed",
-      (snap) => {
-        const pct = snap.totalBytes > 0
-          ? Math.round((snap.bytesTransferred / snap.totalBytes) * 100)
-          : 0;
-        setUploadProgress(pct);
-      },
-      (err) => {
-        console.error("Storage upload error:", err.code, err.message);
-        let msg: string;
-        switch (err.code) {
-          case "storage/unauthorized":
-            msg = "Upload rejected — your session may lack the admin claim. Sign out and back in, then retry.";
-            break;
-          case "storage/canceled":
-            msg = "Upload was cancelled.";
-            break;
-          case "storage/quota-exceeded":
-            msg = "Storage quota exceeded.";
-            break;
-          default:
-            msg = `Upload failed (${err.code}) — ${err.message}`;
-        }
-        setUploadError(msg);
-        setUploadProgress(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      },
-      async () => {
-        const url = await getDownloadURL(task.snapshot.ref);
-        setCoverImageUrl(url);
-        setUploadProgress(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      }
-    );
+    setUploading(false);
   }
 
   if (loading) {
@@ -455,16 +416,11 @@ export default function ProjectEditPage() {
                     type="file"
                     accept="image/*"
                     onChange={handleFileSelect}
-                    disabled={uploadProgress !== null}
+                    disabled={uploading}
                     style={{ fontSize: 13, width: "100%" }}
                   />
-                  {uploadProgress !== null && (
-                    <div style={{ marginTop: 8 }}>
-                      <div style={{ height: 4, background: "#e5e7eb", borderRadius: 2, overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${uploadProgress}%`, background: "var(--green-700)", transition: "width 0.2s" }} />
-                      </div>
-                      <p style={{ fontSize: 12, color: "#6b7280", margin: "4px 0 0" }}>{uploadProgress}%</p>
-                    </div>
+                  {uploading && (
+                    <p style={{ fontSize: 12, color: "#6b7280", margin: "6px 0 0" }}>Uploading…</p>
                   )}
                   {uploadError && (
                     <p style={{ fontSize: 12, color: "#dc2626", margin: "6px 0 0" }}>{uploadError}</p>
@@ -475,7 +431,7 @@ export default function ProjectEditPage() {
               {/* Save */}
               <button
                 onClick={handleSave}
-                disabled={saving || uploadProgress !== null}
+                disabled={saving || uploading}
                 style={{
                   width: "100%",
                   padding: "12px 24px",
