@@ -6,7 +6,13 @@ import { usePathname } from "next/navigation";
 import { Icon } from "./icons";
 import { CONTENT, navHref, type Locale } from "@/lib/content";
 
-export default function Header({ locale }: { locale: Locale }) {
+export default function Header({
+  locale,
+  showLangSwitch = true,
+}: {
+  locale: Locale;
+  showLangSwitch?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -58,10 +64,12 @@ export default function Header({ locale }: { locale: Locale }) {
           </nav>
 
           <div className="nav-right">
-            <Link className="lang-switch" href={altPath} aria-label={ui.lang}>
-              <Icon.globe />
-              <span>{ui.lang}</span>
-            </Link>
+            {showLangSwitch && (
+              <Link className="lang-switch" href={altPath} aria-label={ui.lang}>
+                <Icon.globe />
+                <span>{ui.lang}</span>
+              </Link>
+            )}
             <button className="menu-toggle" onClick={() => setOpen(!open)} aria-label="Menu">
               <span />
             </button>

@@ -5,7 +5,9 @@ import { Archivo, Manrope, Cairo, IBM_Plex_Sans_Arabic } from "next/font/google"
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import UnderConstruction from "@/components/UnderConstruction";
 import { LOCALES, type Locale } from "@/lib/content";
+import { isArabicEnabled } from "@/lib/cms/locale-settings";
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -74,10 +76,28 @@ export default async function LocaleLayout({
   const typedLocale = locale as Locale;
   const dir = typedLocale === "ar" ? "rtl" : "ltr";
 
+  const arabicEnabled = await isArabicEnabled();
+
+  // Arabic site switched off → show Under Construction for all /ar pages,
+  // with links pointing to the English site (no header/footer to avoid
+  // navigating deeper into the disabled locale).
+  if (typedLocale === "ar" && !arabicEnabled) {
+    return (
+      <html lang="ar" dir="rtl" className={fontVars}>
+        <body>
+          <UnderConstruction locale="ar" homeHref="/en" contactHref="/en/contact" />
+        </body>
+      </html>
+    );
+  }
+
+  // Hide the language button when it would point to a disabled locale.
+  const showLangSwitch = typedLocale === "ar" ? true : arabicEnabled;
+
   return (
     <html lang={typedLocale} dir={dir} className={fontVars}>
       <body>
-        <Header locale={typedLocale} />
+        <Header locale={typedLocale} showLangSwitch={showLangSwitch} />
         {children}
         <Footer locale={typedLocale} />
         <WhatsAppFloat />

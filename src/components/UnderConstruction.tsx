@@ -22,8 +22,20 @@ const COPY = {
   },
 };
 
-export default function UnderConstruction({ locale }: { locale: Locale }) {
+export default function UnderConstruction({
+  locale,
+  homeHref,
+  contactHref,
+}: {
+  locale: Locale;
+  // Override the action links (e.g. when the whole Arabic site is disabled,
+  // point visitors at the English site instead of looping back to /ar).
+  homeHref?: string;
+  contactHref?: string;
+}) {
   const t = COPY[locale];
+  const homeLink = homeHref ?? `/${locale}`;
+  const contactLink = contactHref ?? `/${locale}/contact`;
 
   return (
     <div
@@ -74,13 +86,13 @@ export default function UnderConstruction({ locale }: { locale: Locale }) {
         {/* Actions */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 14 }}>
           <Link
-            href={`/${locale}`}
+            href={homeLink}
             className="btn btn-gold"
           >
             {t.home}
           </Link>
           <Link
-            href={`/${locale}/contact`}
+            href={contactLink}
             className="btn btn-ghost"
           >
             {t.contact}

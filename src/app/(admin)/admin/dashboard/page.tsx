@@ -12,6 +12,7 @@ import {
   type SectionKey,
 } from "@/lib/cms/sections";
 import { isEditableSection } from "@/lib/cms/section-schema";
+import { getArabicEnabled, setArabicEnabled } from "@/lib/actions/locale-settings";
 
 // Section descriptions shown in the dashboard
 const SECTION_DESCRIPTIONS: Record<string, string> = {
@@ -72,6 +73,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [anyBusy, setAnyBusy] = useState(false);
+  const [arabicEnabled, setArabicEnabledState] = useState<boolean | null>(null);
+  const [arabicBusy, setArabicBusy] = useState(false);
 
   useEffect(() => {
     const auth = getClientAuth();
@@ -82,8 +85,12 @@ export default function DashboardPage() {
       }
       setUserEmail(user.email);
       try {
-        const data = await getAllSections(user.email);
+        const [data, arabic] = await Promise.all([
+          getAllSections(user.email),
+          getArabicEnabled(),
+        ]);
         setSections(data);
+        setArabicEnabledState(arabic);
       } catch (err) {
         console.error(err);
         setError(
@@ -95,6 +102,19 @@ export default function DashboardPage() {
     });
     return unsubscribe;
   }, [router]);
+
+  async function handleToggleArabic() {
+    if (arabicEnabled === null) return;
+    setArabicBusy(true);
+    const next = !arabicEnabled;
+    const result = await setArabicEnabled(next);
+    if (result.ok) {
+      setArabicEnabledState(next);
+    } else {
+      setError(result.error ?? "Failed to update Arabic site setting.");
+    }
+    setArabicBusy(false);
+  }
 
   const handleToggle = useCallback(
     async (key: SectionKey, currentFrozen: boolean) => {
@@ -198,6 +218,40 @@ export default function DashboardPage() {
           {loading && (
             <div style={{ padding: 48, textAlign: "center", color: "#8a8e87", fontSize: 14 }}>
               Loading sections…
+            </div>
+          )}
+
+          {/* Site settings — Arabic locale toggle */}
+          {!loading && arabicEnabled !== null && (
+            <div
+              style={{
+                marginBottom: 32, padding: "18px 22px",
+                background: "#fff", border: "1px solid #eaece6", borderRadius: 8,
+                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap",
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>Arabic site (العربية)</div>
+                <div style={{ fontSize: 12.5, color: "#8a8e87", maxWidth: 560 }}>
+                  {arabicEnabled
+                    ? "Arabic is live. The language switch is visible and /ar pages show real content."
+                    : "Arabic is switched off. The language button is hidden and all /ar pages show Under Construction."}
+                </div>
+              </div>
+              <button
+                onClick={handleToggleArabic}
+                disabled={arabicBusy}
+                className={`admin-btn${arabicEnabled ? "" : " ghost"}`}
+                style={{
+                  fontSize: 12, padding: "8px 18px", whiteSpace: "nowrap",
+                  opacity: arabicBusy ? 0.5 : 1, cursor: arabicBusy ? "not-allowed" : "pointer",
+                  background: arabicEnabled ? "var(--green-800)" : "transparent",
+                  border: arabicEnabled ? "1px solid transparent" : "1px solid var(--gold-600)",
+                  color: arabicEnabled ? "#fff" : "var(--gold-700)",
+                }}
+              >
+                {arabicBusy ? "…" : arabicEnabled ? "🌐 Switch OFF Arabic" : "🌐 Switch ON Arabic"}
+              </button>
             </div>
           )}
 
