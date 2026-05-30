@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Icon } from "./icons";
 import { CONTENT, IMAGES, type Locale, type Project } from "@/lib/content";
 
@@ -32,7 +33,11 @@ export default function ProjectModal({
     { label: ui.year, val: project.year },
   ];
 
-  return (
+  // The modal only renders after a client-side click, so document.body exists.
+  // Portal to <body> so the overlay centers on the viewport, not inside the
+  // page's .page-enter wrapper (its transform animation creates a containing
+  // block that would otherwise offset position:fixed).
+  return createPortal(
     <div
       style={{
         position: "fixed",
@@ -87,6 +92,7 @@ export default function ProjectModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
