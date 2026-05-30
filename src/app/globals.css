@@ -288,7 +288,11 @@ html[dir="rtl"] .brand-name small { font-family: var(--font-arabic); letter-spac
   gap: 16px;
   border-bottom: 1px solid var(--line);
   align-items: flex-start;
+  /* Dropdown bg is always cream, so force dark link text even when the
+     header is in on-dark mode (home hero) — otherwise links are invisible. */
+  color: var(--ink);
 }
+.nav-links.mobile-open .nav-link { opacity: 1; }
 
 /* ─── Hero ─────────────────────────────────────────────────── */
 .hero {
