@@ -16,6 +16,16 @@ export const Icon = {
       <circle cx="11.5" cy="21.5" r="2.6" />
     </svg>
   ),
+  av: (props: IconProps) => (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      {/* display screen */}
+      <rect x="6" y="8" width="36" height="24" rx="2" />
+      {/* play glyph */}
+      <path d="M20 15l9 5-9 5z" />
+      {/* stand */}
+      <path d="M24 32v6M16 40h16" />
+    </svg>
+  ),
   building: (props: IconProps) => (
     <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M6 42h36" />
