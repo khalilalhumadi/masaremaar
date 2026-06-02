@@ -84,13 +84,13 @@ export const CONTENT = {
       { num: "2017", label: "Year established" },
       { num: "9", sup: "+", label: "Years of experience" },
       { num: "13", sup: "+", label: "Major projects delivered" },
-      { num: "6", label: "Service disciplines" },
+      { num: "7", label: "Service disciplines" },
     ],
     ar: [
       { num: "2017", label: "سنة التأسيس" },
       { num: "9", sup: "+", label: "سنوات من الخبرة" },
       { num: "13", sup: "+", label: "مشروع كبير منجز" },
-      { num: "6", label: "تخصصات الخدمة" },
+      { num: "7", label: "تخصصات الخدمة" },
     ],
   },
 
@@ -100,6 +100,7 @@ export const CONTENT = {
       title: ["Comprehensive contracting,", { em: "engineered" }, "precisely."] as TitlePart[],
       cta: "All services",
       items: [
+        { id: "elv", icon: "cctv", title: "Low Current, ELV & AV Systems", desc: "Design, installation, and integration of CCTV, access control, intercom, structured cabling, Wi-Fi, public address, TV distribution, and basic audio-visual systems for residential, commercial, and industrial projects." },
         { id: "building", icon: "building", title: "Building Construction & Equipping", desc: "Delivering high-quality construction solutions, including the full equipping of buildings to meet both functional and aesthetic requirements." },
         { id: "precast", icon: "precast", title: "Precast & General Construction", desc: "Efficient precast solutions alongside general construction services for residential, commercial, and industrial projects." },
         { id: "infrastructure", icon: "roads", title: "Infrastructure & Roadworks", desc: "Specialised in the construction of canals, roads, and railways, ensuring durable and sustainable infrastructure across the Kingdom." },
@@ -113,6 +114,7 @@ export const CONTENT = {
       title: ["مقاولات متكاملة،", { em: "بدقّة هندسية." }] as TitlePart[],
       cta: "جميع الخدمات",
       items: [
+        { id: "elv", icon: "cctv", title: "أنظمة التيار الخفيف والجهد المنخفض والصوت والصورة", desc: "تصميم وتركيب وتكامل أنظمة المراقبة بالكاميرات (CCTV)، والتحكم في الدخول، والاتصال الداخلي، والكابلات المنظمة، وشبكات الواي فاي، وأنظمة النداء العام، وتوزيع التلفاز، والأنظمة الصوتية والمرئية الأساسية للمشاريع السكنية والتجارية والصناعية." },
         { id: "building", icon: "building", title: "تشييد المباني والتجهيز", desc: "حلول إنشاء عالية الجودة تشمل التجهيز الكامل للمباني لتلبية المتطلبات الوظيفية والجمالية على حدٍّ سواء." },
         { id: "precast", icon: "precast", title: "الخرسانة الجاهزة والإنشاءات العامة", desc: "حلول خرسانية جاهزة وخدمات إنشاء عامة للمشاريع السكنية والتجارية والصناعية." },
         { id: "infrastructure", icon: "roads", title: "البنية التحتية والطرق", desc: "متخصصون في إنشاء القنوات والطرق والسكك الحديدية، لضمان بنية تحتية متينة ومستدامة في جميع أنحاء المملكة." },

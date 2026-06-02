@@ -4,6 +4,18 @@ import type { SVGProps } from "react";
 type IconProps = SVGProps<SVGSVGElement>;
 
 export const Icon = {
+  cctv: (props: IconProps) => (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      {/* ceiling/wall mount + arm */}
+      <path d="M34 10h10M39 10v4M39 14l-6 3" />
+      {/* camera body (angled) */}
+      <path d="M6 20l27-6 2.4 9.6-27 6z" />
+      {/* sunshade ridge */}
+      <path d="M14 16.5l18-4" />
+      {/* lens */}
+      <circle cx="11.5" cy="21.5" r="2.6" />
+    </svg>
+  ),
   building: (props: IconProps) => (
     <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M6 42h36" />

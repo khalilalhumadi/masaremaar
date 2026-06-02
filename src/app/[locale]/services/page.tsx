@@ -25,8 +25,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         title={svc.title}
         sub={
           en
-            ? "Six integrated disciplines, delivered under one roof — covering every stage of the construction lifecycle."
-            : "ستة تخصصات متكاملة تحت سقف واحد، تغطي كل مراحل دورة حياة الإنشاء."
+            ? "Seven integrated disciplines, delivered under one roof — covering every stage of the construction lifecycle."
+            : "سبعة تخصصات متكاملة تحت سقف واحد، تغطي كل مراحل دورة حياة الإنشاء."
         }
         bg={IMAGES.service.building}
         breadcrumb={<Breadcrumb locale={locale} homeLabel={nav[0].label} current={nav[2].label} />}
