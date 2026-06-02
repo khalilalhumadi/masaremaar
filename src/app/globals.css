@@ -617,6 +617,10 @@ html[dir="rtl"] .service-arrow { transform: scaleX(-1); align-self: flex-end; }
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 24px;
+  /* Each card hugs its own image height; without this, a regular (4/3) card
+     sharing a row with a featured (16/10) card stretches and its overlay
+     detaches from the image, clipping the location text. */
+  align-items: start;
 }
 .project-card {
   grid-column: span 4;
