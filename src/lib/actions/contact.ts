@@ -1,13 +1,17 @@
 "use server";
 
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-// Where enquiries are delivered. Overridable via env without code change.
+// All SMTP config is server-only (never NEXT_PUBLIC) so credentials never
+// reach the browser. Configured for GoDaddy / Microsoft 365 SMTP.
+const SMTP_HOST = process.env.SMTP_HOST || "smtp.office365.com";
+const SMTP_PORT = Number(process.env.SMTP_PORT || "587");
+const SMTP_SECURE = (process.env.SMTP_SECURE || "false").toLowerCase() === "true";
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASSWORD = process.env.SMTP_PASSWORD;
+
 const TO_EMAIL = process.env.CONTACT_TO_EMAIL || "info@masaremaar.com";
-// Sender. Must be on a domain verified in Resend for delivery to external
-// inboxes. Defaults to the masaremaar.com domain (verify it in Resend).
-const FROM_EMAIL =
-  process.env.CONTACT_FROM_EMAIL || "Masar Emaar Website <noreply@masaremaar.com>";
+const FROM_EMAIL = process.env.CONTACT_FROM_EMAIL || SMTP_USER || "info@masaremaar.com";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -39,13 +43,10 @@ export async function sendEnquiry(input: EnquiryInput): Promise<EnquiryResult> {
   if (!email || !EMAIL_RE.test(email)) return { ok: false, error: "A valid email is required." };
   if (!message) return { ok: false, error: "Message is required." };
 
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.error("sendEnquiry: RESEND_API_KEY is not set");
+  if (!SMTP_USER || !SMTP_PASSWORD) {
+    console.error("sendEnquiry: SMTP_USER / SMTP_PASSWORD are not set");
     return { ok: false, error: "Email service is not configured. Please email us directly." };
   }
-
-  const resend = new Resend(apiKey);
 
   const lines = [
     `Name:    ${name}`,
@@ -73,23 +74,29 @@ export async function sendEnquiry(input: EnquiryInput): Promise<EnquiryResult> {
       <p style="margin:0;white-space:pre-wrap">${esc(message)}</p>
     </div>`;
 
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_SECURE, // false for port 587 (STARTTLS), true for 465
+    auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
+    // Don't let a slow/blocked SMTP handshake hang the Server Action.
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
+  });
+
   try {
-    const { error } = await resend.emails.send({
+    await transporter.sendMail({
       from: FROM_EMAIL,
-      to: [TO_EMAIL],
+      to: TO_EMAIL,
       replyTo: email,
       subject: "New enquiry from Masaremaar website",
       text,
       html,
     });
-
-    if (error) {
-      console.error("sendEnquiry: Resend error:", error);
-      return { ok: false, error: "Could not send your message. Please try again or email us directly." };
-    }
     return { ok: true };
   } catch (err) {
-    console.error("sendEnquiry: unexpected error:", err);
+    console.error("sendEnquiry: SMTP send error:", err);
     return { ok: false, error: "Could not send your message. Please try again or email us directly." };
   }
 }
