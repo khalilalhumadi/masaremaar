@@ -1,4 +1,7 @@
-"use server";
+// sendEnquiry.ts — server-only contact-email logic (nodemailer / SMTP).
+// Imported by the /api/contact route handler. Not a Server Action, so it has
+// no per-build action id — the public entry point is the stable /api/contact URL.
+import "server-only";
 
 import nodemailer from "nodemailer";
 
@@ -79,7 +82,7 @@ export async function sendEnquiry(input: EnquiryInput): Promise<EnquiryResult> {
     port: SMTP_PORT,
     secure: SMTP_SECURE, // false for port 587 (STARTTLS), true for 465
     auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
-    // Don't let a slow/blocked SMTP handshake hang the Server Action.
+    // Don't let a slow/blocked SMTP handshake hang the request.
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,
     socketTimeout: 20_000,

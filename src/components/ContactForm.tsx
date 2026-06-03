@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Icon } from "./icons";
 import { CONTENT, type Locale } from "@/lib/content";
-import { sendEnquiry } from "@/lib/actions/contact";
 
 export default function ContactForm({ locale }: { locale: Locale }) {
   const c = CONTENT.contact[locale];
@@ -14,30 +13,47 @@ export default function ContactForm({ locale }: { locale: Locale }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function showError(serverMsg?: string) {
+    setError(
+      en
+        ? serverMsg || "Could not send your message. Please try again or email us directly."
+        : "تعذّر إرسال رسالتك. يرجى المحاولة مرة أخرى أو مراسلتنا مباشرة."
+    );
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setSending(true);
 
     const fd = new FormData(e.currentTarget);
-    const result = await sendEnquiry({
+    const payload = {
       name: String(fd.get("name") || ""),
       email: String(fd.get("email") || ""),
       phone: String(fd.get("phone") || ""),
       service: String(fd.get("service") || ""),
       message: String(fd.get("message") || ""),
       company: String(fd.get("company") || ""), // honeypot
-    });
+    };
 
-    setSending(false);
-    if (result.ok) {
-      setSubmitted(true);
-    } else {
-      setError(
-        en
-          ? result.error
-          : "تعذّر إرسال رسالتك. يرجى المحاولة مرة أخرى أو مراسلتنا مباشرة."
-      );
+    // POST to a stable API route (not a Server Action) so a cached/old client
+    // bundle can never hit a missing action id (UnrecognizedActionError).
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json().catch(() => ({ ok: false }));
+      if (result.ok) {
+        setSubmitted(true);
+      } else {
+        showError(result.error);
+      }
+    } catch {
+      showError();
+    } finally {
+      setSending(false);
     }
   }
 
