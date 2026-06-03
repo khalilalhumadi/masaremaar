@@ -8,6 +8,9 @@ import { getPublishedSectionData } from "@/lib/data/section-content";
 import { resolveContact } from "@/lib/cms/section-schema";
 
 export const revalidate = 60;
+// Force Node.js runtime: the contact Server Action uses nodemailer, which
+// relies on Node APIs (net/tls) not available in the Edge runtime.
+export const runtime = "nodejs";
 
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
