@@ -132,6 +132,10 @@ export const SECTION_FIELD_GROUPS: Record<EditableSectionKey, SectionFieldGroup[
   ],
   contact: [
     {
+      title: "Banner",
+      fields: [{ key: "header_image_url", label: "Page banner image", type: "image" }],
+    },
+    {
       title: "Contact details",
       fields: [
         { key: "email", label: "Email (shared)", type: "text" },
@@ -189,11 +193,19 @@ export const SECTION_FIELD_GROUPS: Record<EditableSectionKey, SectionFieldGroup[
   ],
   services: [
     {
+      title: "Banner",
+      fields: [{ key: "header_image_url", label: "Page banner image", type: "image" }],
+    },
+    {
       title: "Service items",
       fields: [{ key: "items", label: "Services", type: "service_items" }],
     },
   ],
   how_we_work: [
+    {
+      title: "Banner",
+      fields: [{ key: "header_image_url", label: "Page banner image", type: "image" }],
+    },
     {
       title: "Page intro",
       fields: [
@@ -207,6 +219,10 @@ export const SECTION_FIELD_GROUPS: Record<EditableSectionKey, SectionFieldGroup[
     },
   ],
   company_profile: [
+    {
+      title: "Banner",
+      fields: [{ key: "header_image_url", label: "Page banner image", type: "image" }],
+    },
     {
       title: "Download",
       fields: [
@@ -305,6 +321,7 @@ export function defaultOverride(key: EditableSectionKey): SectionOverride {
 
   if (key === "contact") {
     return {
+      header_image_url: IMAGES.service.civil,
       email: CONTENT.contact.en.email,
       phone: CONTENT.contact.en.phone,
       address_en: CONTENT.contact.en.address,
@@ -322,7 +339,7 @@ export function defaultOverride(key: EditableSectionKey): SectionOverride {
       desc_en: it.desc,
       desc_ar: CONTENT.services.ar.items[i]?.desc ?? "",
     }));
-    return { items };
+    return { header_image_url: IMAGES.service.building, items };
   }
 
   if (key === "how_we_work") {
@@ -333,6 +350,7 @@ export function defaultOverride(key: EditableSectionKey): SectionOverride {
       desc_ar: CONTENT.how.ar.steps[i]?.desc ?? "",
     }));
     return {
+      header_image_url: IMAGES.service.civil,
       sub_en: CONTENT.how.en.sub,
       sub_ar: CONTENT.how.ar.sub,
       steps,
@@ -340,7 +358,7 @@ export function defaultOverride(key: EditableSectionKey): SectionOverride {
   }
 
   if (key === "company_profile") {
-    return { pdfUrl: DEFAULT_PROFILE_PDF };
+    return { header_image_url: IMAGES.hero, pdfUrl: DEFAULT_PROFILE_PDF };
   }
 
   // about
@@ -377,6 +395,14 @@ export function defaultOverride(key: EditableSectionKey): SectionOverride {
 
 function str(v: unknown): string {
   return typeof v === "string" ? v : "";
+}
+
+/**
+ * Resolve a page's banner (PageHead background) image from a section override.
+ * Returns the CMS-set `header_image_url` if present, else the given fallback.
+ */
+export function sectionBanner(o: SectionOverride | null, fallback: string): string {
+  return str(o?.header_image_url) || fallback;
 }
 
 export function resolveContact(locale: Locale, o: SectionOverride | null) {

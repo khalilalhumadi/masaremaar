@@ -6,7 +6,7 @@ import { CONTENT, IMAGES, navHref, type Locale, type TitlePart } from "@/lib/con
 import { isSectionFrozen } from "@/lib/cms/freeze";
 import UnderConstruction from "@/components/UnderConstruction";
 import { getPublishedSectionData } from "@/lib/data/section-content";
-import { resolveProfilePdf } from "@/lib/cms/section-schema";
+import { resolveProfilePdf, sectionBanner } from "@/lib/cms/section-schema";
 
 export const revalidate = 60;
 
@@ -29,7 +29,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
   const nav = CONTENT.nav[locale];
   const ui = CONTENT.ui[locale];
   const en = locale === "en";
-  const profilePdf = resolveProfilePdf(await getPublishedSectionData("company_profile"));
+  const ov = await getPublishedSectionData("company_profile");
+  const profilePdf = resolveProfilePdf(ov);
 
   const title: TitlePart[] = [
     en ? "Read our full" : "اقرأ",
@@ -46,7 +47,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
             ? "18 pages — vision, services, methodology, and a curated selection of projects."
             : "18 صفحة — الرؤية والخدمات والمنهجية ومجموعة مختارة من المشاريع."
         }
-        bg={IMAGES.hero}
+        bg={sectionBanner(ov, IMAGES.hero)}
         breadcrumb={<Breadcrumb locale={locale} homeLabel={nav[0].label} current={nav[5].label} />}
       />
 

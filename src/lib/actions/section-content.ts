@@ -82,3 +82,32 @@ export async function publishSection(
   revalidatePath(`/admin/sections/${key}`);
   return { ok: true };
 }
+
+/**
+ * Set the Projects page banner (PageHead background). Projects content lives in
+ * cms_projects (not a content section), so its banner is stored separately in
+ * cms_sections/projects.publishedData.header_image_url via a merge write.
+ */
+export async function setProjectsBanner(url: string): Promise<ActionResult> {
+  const session = await getVerifiedSession();
+  if (!session) return { ok: false, error: "Unauthorized" };
+  if (!isAdminConfigured()) return { ok: false, error: "Firebase not configured" };
+  if (typeof url !== "string" || !url.trim()) return { ok: false, error: "No image URL" };
+
+  await getAdminDb().collection("cms_sections").doc("projects").set(
+    {
+      publishedData: { header_image_url: url },
+      draftData: { header_image_url: url },
+      lastEditedBy: session.uid,
+      lastEditedAt: FieldValue.serverTimestamp(),
+      lastPublishedBy: session.uid,
+      lastPublishedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  );
+
+  revalidatePath("/en/projects");
+  revalidatePath("/ar/projects");
+  revalidatePath("/admin/projects");
+  return { ok: true };
+}

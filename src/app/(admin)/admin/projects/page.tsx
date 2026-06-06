@@ -6,8 +6,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getClientAuth } from "@/lib/firebase/client";
 import { setProjectPublished } from "@/lib/actions/projects";
+import { setProjectsBanner } from "@/lib/actions/section-content";
+import ImageUploadField from "@/components/admin/ImageUploadField";
 import { CATEGORY_LABELS } from "@/lib/cms-types";
 import type { CmsProject } from "@/lib/cms-types";
+import { IMAGES } from "@/lib/content";
 
 // Client-side Firestore imports for reading project list
 import {
@@ -15,6 +18,8 @@ import {
   getDocs,
   orderBy,
   query,
+  doc,
+  getDoc,
 } from "firebase/firestore";
 import { getClientDb } from "@/lib/firebase/client";
 
@@ -32,10 +37,21 @@ export default function AdminProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [bannerUrl, setBannerUrl] = useState("");
+  const [bannerSaving, setBannerSaving] = useState(false);
+  const [bannerMsg, setBannerMsg] = useState<string | null>(null);
 
   const fetchProjects = useCallback(async () => {
     try {
       const db = getClientDb();
+      // Page banner (stored in cms_sections/projects).
+      try {
+        const sd = await getDoc(doc(db, "cms_sections", "projects"));
+        const pub = sd.exists() ? (sd.data().publishedData as Record<string, unknown> | null) : null;
+        setBannerUrl((pub?.header_image_url as string) || IMAGES.project["king-fahd"]);
+      } catch {
+        setBannerUrl(IMAGES.project["king-fahd"]);
+      }
       const q = query(collection(db, "cms_projects"), orderBy("sortOrder", "asc"));
       const snap = await getDocs(q);
       const list: CmsProject[] = snap.docs.map((d) => {
@@ -89,6 +105,14 @@ export default function AdminProjectsPage() {
     await signOut(getClientAuth());
     await fetch("/api/auth/session", { method: "DELETE" });
     router.replace("/admin/login");
+  }
+
+  async function handleSaveBanner() {
+    setBannerSaving(true);
+    setBannerMsg(null);
+    const result = await setProjectsBanner(bannerUrl);
+    setBannerMsg(result.ok ? "Banner saved — live within 60 seconds." : (result.error ?? "Failed to save banner."));
+    setBannerSaving(false);
   }
 
   async function handleTogglePublished(proj: CmsProject) {
@@ -155,6 +179,32 @@ export default function AdminProjectsPage() {
             Projects freeze status set in{" "}
             <Link href="/admin/dashboard" style={{ color: "var(--green-700)" }}>Section Control</Link>.
           </p>
+
+          {/* Page banner */}
+          <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 8, padding: 24, marginBottom: 28, maxWidth: 640 }}>
+            <h2 style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 600 }}>Page banner</h2>
+            <p style={{ margin: "0 0 16px", fontSize: 13, color: "#6b7280" }}>
+              Background image at the top of the public Projects page.
+            </p>
+            <ImageUploadField
+              label="Projects banner image"
+              sectionKey="projects"
+              value={bannerUrl}
+              onChange={setBannerUrl}
+            />
+            {bannerMsg && (
+              <p style={{ fontSize: 13, margin: "0 0 10px", color: bannerMsg.includes("saved") ? "#16a34a" : "#dc2626" }}>
+                {bannerMsg}
+              </p>
+            )}
+            <button
+              onClick={handleSaveBanner}
+              disabled={bannerSaving}
+              style={{ padding: "10px 22px", background: "var(--green-700, #15803d)", color: "#fff", border: 0, borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: bannerSaving ? "wait" : "pointer", opacity: bannerSaving ? 0.7 : 1 }}
+            >
+              {bannerSaving ? "Saving…" : "Save banner"}
+            </button>
+          </div>
 
           {error && (
             <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 6, padding: "12px 16px", marginBottom: 20, fontSize: 14, color: "#dc2626" }}>

@@ -6,7 +6,7 @@ import { CONTENT, IMAGES, navHref, type Locale } from "@/lib/content";
 import { isSectionFrozen } from "@/lib/cms/freeze";
 import UnderConstruction from "@/components/UnderConstruction";
 import { getPublishedSectionData } from "@/lib/data/section-content";
-import { resolveServices } from "@/lib/cms/section-schema";
+import { resolveServices, sectionBanner } from "@/lib/cms/section-schema";
 
 export const revalidate = 60;
 
@@ -14,7 +14,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
   const { locale: raw } = await params;
   const locale = raw as Locale;
   if (await isSectionFrozen("services")) return <UnderConstruction locale={locale} />;
-  const svc = resolveServices(locale, await getPublishedSectionData("services"));
+  const ov = await getPublishedSectionData("services");
+  const svc = resolveServices(locale, ov);
   const nav = CONTENT.nav[locale];
   const en = locale === "en";
 
@@ -28,7 +29,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
             ? "Eight integrated disciplines, delivered under one roof — covering every stage of the construction lifecycle."
             : "ثمانية تخصصات متكاملة تحت سقف واحد، تغطي كل مراحل دورة حياة الإنشاء."
         }
-        bg={IMAGES.service.building}
+        bg={sectionBanner(ov, IMAGES.service.building)}
         breadcrumb={<Breadcrumb locale={locale} homeLabel={nav[0].label} current={nav[2].label} />}
       />
 

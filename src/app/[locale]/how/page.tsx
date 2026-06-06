@@ -4,7 +4,7 @@ import { CONTENT, IMAGES, type Locale } from "@/lib/content";
 import { isSectionFrozen } from "@/lib/cms/freeze";
 import UnderConstruction from "@/components/UnderConstruction";
 import { getPublishedSectionData } from "@/lib/data/section-content";
-import { resolveHow } from "@/lib/cms/section-schema";
+import { resolveHow, sectionBanner } from "@/lib/cms/section-schema";
 
 export const revalidate = 60;
 
@@ -12,7 +12,8 @@ export default async function HowPage({ params }: { params: Promise<{ locale: st
   const { locale: raw } = await params;
   const locale = raw as Locale;
   if (await isSectionFrozen("how_we_work")) return <UnderConstruction locale={locale} />;
-  const h = resolveHow(locale, await getPublishedSectionData("how_we_work"));
+  const ov = await getPublishedSectionData("how_we_work");
+  const h = resolveHow(locale, ov);
   const nav = CONTENT.nav[locale];
   const en = locale === "en";
 
@@ -22,7 +23,7 @@ export default async function HowPage({ params }: { params: Promise<{ locale: st
         eyebrow={h.eyebrow}
         title={h.title}
         sub={h.sub}
-        bg={IMAGES.service.civil}
+        bg={sectionBanner(ov, IMAGES.service.civil)}
         breadcrumb={<Breadcrumb locale={locale} homeLabel={nav[0].label} current={nav[4].label} />}
       />
 
